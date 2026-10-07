@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>financial-db Schema 圖</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --ink:#212930; --muted:#5B6670; --line:#D8DEE2;
+  --fm:#0E6E8C; --fm-soft:#E2EFF4; --tej:#B25417; --tej-soft:#F6EADE;
+  --chip:#ECEFF1; --pk:#8A5A00; --pk-bg:#F5E9CF; --dimop:.14;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13181C; --surface:#1B2228; --ink:#E4E9EC; --muted:#96A1AA; --line:#323C44;
+    --fm:#54B4D3; --fm-soft:#12303B; --tej:#E08B4E; --tej-soft:#382413;
+    --chip:#232B32; --pk:#E3B85E; --pk-bg:#3A2F16;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13181C; --surface:#1B2228; --ink:#E4E9EC; --muted:#96A1AA; --line:#323C44;
+  --fm:#54B4D3; --fm-soft:#12303B; --tej:#E08B4E; --tej-soft:#382413;
+  --chip:#232B32; --pk:#E3B85E; --pk-bg:#3A2F16;
+  color-scheme:dark;
+}
+body{background:var(--bg); color:var(--ink); margin:0;
+  font-family:"IBM Plex Sans","Noto Sans TC",system-ui,sans-serif; font-size:15px; line-height:1.7;}
+.wrap{max-width:1280px; margin:0 auto; padding-inline:20px; padding-block:0 72px;}
+h1{font-size:28px; margin:36px 0 6px; text-wrap:balance;}
+h2{font-size:21px; margin:52px 0 4px;}
+h2 .tag{font-size:12px; font-weight:600; letter-spacing:.08em; vertical-align:3px;
+  padding:2px 8px; border-radius:99px; margin-left:8px;}
+.tag.fm{background:var(--fm-soft); color:var(--fm);}
+.tag.tej{background:var(--tej-soft); color:var(--tej);}
+p{max-width:76ch;}
+.lede{color:var(--muted); font-size:15.5px; margin-top:0;}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.88em;
+  background:var(--chip); padding:1px 5px; border-radius:4px;}
+.legend{display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center;
+  font-size:12.5px; color:var(--muted); margin:14px 0 4px;}
+.legend .sw{display:inline-block; width:26px; height:0; border-top:2.5px solid var(--muted);
+  vertical-align:middle; margin-right:6px;}
+.legend .sw.d{border-top-style:dashed;}
+.legend .chipd{background:var(--pk-bg); color:var(--pk); font-size:10px; font-weight:700;
+  padding:0 5px; border-radius:4px;}
+.legend .chipp{background:var(--chip); color:var(--muted); font-size:10px; font-weight:700;
+  padding:0 5px; border-radius:4px;}
+.diagram{overflow-x:auto; margin:18px 0 8px; border:1px solid var(--line);
+  border-radius:12px; background:var(--surface);}
+.canvas{position:relative; min-width:1120px; padding:18px 18px 26px;}
+.grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 56px; position:relative; z-index:2;}
+.lane{display:flex; flex-direction:column; gap:16px; min-width:0;}
+.lane>h3{margin:0 0 2px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); font-weight:700;}
+.lane>h3 small{display:block; letter-spacing:0; text-transform:none; font-weight:400; font-size:11.5px;}
+svg.wires{position:absolute; inset:0; z-index:1; pointer-events:none;}
+svg.wires path{fill:none; stroke-width:1.6; transition:opacity .15s;}
+svg.wires path.rp{stroke-width:2.2;}
+svg.wires path.vv{stroke-dasharray:5 4;}
+svg.wires path.ext{stroke-dasharray:2.5 4; stroke-width:1.4;}
+.dimmed svg.wires path{opacity:var(--dimop);}
+.dimmed svg.wires path.hot{opacity:1; stroke-width:2.6;}
+.card{background:var(--surface); border:1.5px solid var(--line); border-radius:9px;
+  overflow:hidden; font-size:12px; transition:opacity .15s, box-shadow .15s;}
+.dimmed .card{opacity:.38;}
+.dimmed .card.hot{opacity:1; box-shadow:0 2px 10px rgba(0,0,0,.14);}
+.card header{padding:6px 10px; display:flex; justify-content:space-between; gap:8px;
+  align-items:baseline; border-bottom:1px solid var(--line);}
+.card header b{font-family:"IBM Plex Mono",monospace; font-size:12px; word-break:break-all;}
+.card header .n{color:var(--muted); font-size:10.5px; white-space:nowrap; font-variant-numeric:tabular-nums;}
+.card .sub{padding:3px 10px; font-size:10.5px; color:var(--muted);
+  border-bottom:1px solid var(--line); background:var(--chip);}
+.card ul{list-style:none; margin:0; padding:5px 10px 7px; columns:1;}
+.card ul.two{columns:2; column-gap:14px;}
+.card li{display:flex; gap:6px; align-items:baseline; line-height:1.55; break-inside:avoid;}
+.card li b{font-family:"IBM Plex Mono",monospace; font-weight:500; font-size:11px;}
+.card li .t{color:var(--muted); font-size:10px; font-family:"IBM Plex Mono",monospace;
+  margin-left:auto; white-space:nowrap;}
+.card li .pk{background:var(--pk-bg); color:var(--pk); font-size:9px; font-weight:700;
+  padding:0 4px; border-radius:4px; flex:none;}
+.card li .pt{background:var(--chip); color:var(--muted); font-size:9px; font-weight:700;
+  padding:0 4px; border-radius:4px; flex:none;}
+.card li .xc{color:var(--muted); font-size:10px; font-family:"IBM Plex Mono",monospace;
+  width:18px; flex:none;}
+.card li .zh{font-size:11px;}
+.card li .en{font-family:"IBM Plex Mono",monospace; font-size:10.5px; margin-left:auto;
+  white-space:nowrap;}
+.fm-d .card header{background:var(--fm-soft);}
+.tej-d .card header{background:var(--tej-soft);}
+.card.extc{border-style:dashed;}
+.card.extc header{background:transparent;}
+.card.macro header{background:transparent;}
+.fm-d .card.macro{border-color:var(--fm);}
+.tej-d .card.macro{border-color:var(--tej);}
+.note{color:var(--muted); font-size:13px; max-width:none; margin:6px 0 0;}
+footer{margin-top:56px; border-top:1px solid var(--line); padding-top:14px;
+  color:var(--muted); font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<h1>financial-db Schema 圖</h1>
+<p class="lede">
+兩條管線各一張圖，raw → processed → view 三層並列。每張卡片是一張實體表（或 view），
+列出全部欄位與型別；連線是血緣——哪個 raw 進到哪個 processed、哪個 view 讀哪份 Parquet、
+哪個 view 疊在哪個 view 上。<b>滑鼠移到卡片上會亮起它的上下游。</b>
+全部欄位型別直接 dump 自兩個 DuckDB 與 Parquet 檔（2026-09-29），不是抄文件。
+</p>
+<div class="legend">
+  <span><span class="sw" style="border-color:var(--fm)"></span>raw → processed（實體轉換）</span>
+  <span><span class="sw" style="opacity:.55;border-color:var(--fm)"></span>processed → view（read_parquet）</span>
+  <span><span class="sw d" style="border-color:var(--fm)"></span>view → view（SQL 疊加）</span>
+  <span><span class="sw d" style="border-color:var(--muted)"></span>更新時相依／外部輸入</span>
+  <span><span class="chipd">PK</span> 自然鍵（去重／唯一性斷言的鍵）</span>
+  <span><span class="chipp">part</span> Hive 分區鍵</span>
+</div>
+
+<!-- ═══════════════════════ FinMind ═══════════════════════ -->
+<h2 id="finmind">finmind.duckdb <span class="tag fm">19 views + 3 macros・零 table</span></h2>
+<p class="note">raw 層日期都是字串、欄名照上游；processed 層才定型。價格 raw 有 ticker（一檔一檔案）與 market（一天一檔案）兩種形狀，schema 相同，processed 去重時 market 優先。</p>
+
+<div class="diagram fm-d"><div class="canvas" id="cv-fm">
+<svg class="wires" aria-hidden="true"></svg>
+<div class="grid">
+
+<div class="lane"><h3>raw<small>db/finmind/raw・658 MB・API 回什麼存什麼</small></h3>
+
+<div class="card" id="r_dp" data-col="1">
+<header><b>daily-prices-{ticker,market}</b><span class="n">3,602+19 檔</span></header>
+<div class="sub">TaiwanStockPrice・&lt;stock_id&gt;.parquet／date=YYYY-MM-DD.parquet</div>
+<ul class="two">
+<li><b>date</b><span class="t">varchar</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>Trading_Volume</b><span class="t">bigint</span></li>
+<li><b>Trading_money</b><span class="t">bigint</span></li>
+<li><b>open</b><span class="t">double</span></li>
+<li><b>max</b><span class="t">double</span></li>
+<li><b>min</b><span class="t">double</span></li>
+<li><b>close</b><span class="t">double</span></li>
+<li><b>spread</b><span class="t">double</span></li>
+<li><b>Trading_turnover</b><span class="t">bigint</span></li>
+</ul></div>
+
+<div class="card" id="r_adp" data-col="1">
+<header><b>adj-daily-prices-{ticker,market}</b><span class="n">3,154+19 檔</span></header>
+<div class="sub">TaiwanStockPriceAdj・schema 與上同（10 欄）</div>
+</div>
+
+<div class="card" id="r_info" data-col="1">
+<header><b>tw-stock-info/</b><span class="n">每次 1 快照</span></header>
+<div class="sub">TaiwanStockInfo・&lt;快照日&gt;.parquet</div>
+<ul class="two">
+<li><b>industry_category</b><span class="t">varchar</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>type</b><span class="t">varchar</span></li>
+<li><b>date</b><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="r_ind" data-col="1">
+<header><b>tw-industry/</b><span class="n">快照</span></header>
+<div class="sub">TaiwanStockIndustryChain</div>
+<ul class="two">
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>industry</b><span class="t">varchar</span></li>
+<li><b>sub_industry</b><span class="t">varchar</span></li>
+<li><b>date</b><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="r_cal" data-col="1">
+<header><b>tw-trading-dates/</b><span class="n">快照</span></header>
+<div class="sub">TaiwanStockTradingDate・官方日曆（1999-01-05 起）</div>
+<ul><li><b>date</b><span class="t">varchar</span></li></ul></div>
+
+<div class="card" id="r_del" data-col="1">
+<header><b>tw-delisting/</b><span class="n">快照（每週）</span></header>
+<div class="sub">TaiwanStockDelisting・下市公告</div>
+<ul class="two">
+<li><b>date</b><span class="t">varchar</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="r_disc" data-col="1">
+<header><b>discovered-universe/</b><span class="n">快照</span></header>
+<div class="sub">重用 TaiwanStockPrice・2004 起每月抽 1 日全市場掃描</div>
+<ul class="two">
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>shape</b><span class="t">varchar</span></li>
+<li><b>first_seen</b><span class="t">date</span></li>
+<li><b>last_seen</b><span class="t">date</span></li>
+<li><b>sample_hits</b><span class="t">bigint</span></li>
+<li><b>sampled_days</b><span class="t">bigint</span></li>
+<li><b>discovered_at</b><span class="t">tstz</span></li>
+</ul></div>
+
+<div class="card extc" id="r_logs" data-col="1">
+<header><b>logs/runs/*.jsonl</b><span class="n">39 筆</span></header>
+<div class="sub">每次執行的 RunManifest（不在 raw/，屬 logs/）</div>
+</div>
+</div>
+
+<div class="lane"><h3>processed<small>db/finmind/processed・1.1 GB・查詢契約</small></h3>
+
+<div class="card" id="p_dp" data-col="2">
+<header><b>daily-prices/</b><span class="n">11,751,428 列・8,069 檔</span></header>
+<div class="sub">year=YYYY/month=MM/YYYY-MM-DD.parquet（day 分區）・去重 market 優先</div>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>open</b><span class="t">double</span></li>
+<li><b>high</b><span class="t">double</span></li>
+<li><b>low</b><span class="t">double</span></li>
+<li><b>close</b><span class="t">double</span></li>
+<li><b>spread</b><span class="t">double</span></li>
+<li><b>volume</b><span class="t">bigint</span></li>
+<li><b>turnover_value</b><span class="t">bigint</span></li>
+<li><b>transactions</b><span class="t">bigint</span></li>
+<li><b>source</b><span class="t">varchar</span></li>
+<li><b>ingested_at</b><span class="t">tstz</span></li>
+<li><b>year</b><span class="pt">part</span><span class="t">bigint</span></li>
+<li><b>month</b><span class="pt">part</span><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="p_adp" data-col="2">
+<header><b>adj-daily-prices/</b><span class="n">11,252,462 列・8,069 檔</span></header>
+<div class="sub">schema 與上同（survivors-only：下市僅 7 檔）</div>
+</div>
+
+<div class="card" id="p_info" data-col="2">
+<header><b>tw-stock-info/</b><span class="n">4,331 列</span></header>
+<div class="sub">全內容欄位去重・snapshot_date = min()（首見日）</div>
+<ul class="two">
+<li><b>snapshot_date</b><span class="t">date</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>industry_category</b><span class="t">varchar</span></li>
+<li><b>industry_category_norm</b><span class="t">varchar</span></li>
+<li><b>type</b><span class="t">varchar</span></li>
+<li><b>is_index</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="p_ind" data-col="2">
+<header><b>tw-industry/</b><span class="n">6,892 列</span></header>
+<div class="sub">snapshot_date = max()（最後看到）</div>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>industry</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>sub_industry</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>snapshot_date</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card" id="p_cal" data-col="2">
+<header><b>expanded-tw-trading-dates/</b><span class="n">8,141 列</span></header>
+<div class="sub">官方 ∪ 觀測反推（1994–98 段含週六）・TEJ 管線也讀這份</div>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>source</b><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="p_del" data-col="2">
+<header><b>tw-delisting/</b><span class="n">723 列</span></header>
+<div class="sub">DISTINCT・無對外 view，只是 delisted-securities 的原料</div>
+<ul class="two">
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>delisted_date</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card" id="p_delsec" data-col="2">
+<header><b>delisted-securities/</b><span class="n">767 列</span></header>
+<div class="sub">(掃描 ∪ 公告) − 現有主檔，限 in-scope 形狀</div>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>delisted_date</b><span class="t">date</span></li>
+<li><b>shape</b><span class="t">varchar</span></li>
+<li><b>first_seen</b><span class="t">date</span></li>
+<li><b>last_seen</b><span class="t">date</span></li>
+<li><b>source</b><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="p_empty" data-col="2">
+<header><b>known-empty-dates/</b><span class="n">1 列</span></header>
+<div class="sub">日曆說有、實際沒交易的日子</div>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>confirmed_at</b><span class="t">tstz</span></li>
+</ul></div>
+</div>
+
+<div class="lane"><h3>view<small>finmind.duckdb・268 KB・刪掉重跑 build_db.py 就回來</small></h3>
+
+<div class="card" id="v_dp" data-col="3">
+<header><b>v_daily_prices</b><span class="n">11,751,428</span></header>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>open</b><span class="t">double</span></li>
+<li><b>high</b><span class="t">double</span></li>
+<li><b>low</b><span class="t">double</span></li>
+<li><b>close</b><span class="t">double</span></li>
+<li><b>spread</b><span class="t">double</span></li>
+<li><b>volume</b><span class="t">bigint</span></li>
+<li><b>turnover_value</b><span class="t">bigint</span></li>
+<li><b>transactions</b><span class="t">bigint</span></li>
+<li><b>source</b><span class="t">varchar</span></li>
+<li><b>ingested_at</b><span class="t">tstz</span></li>
+<li><b>year</b><span class="pt">part</span><span class="t">int</span></li>
+<li><b>month</b><span class="pt">part</span><span class="t">int</span></li>
+</ul></div>
+
+<div class="card" id="v_adp" data-col="3">
+<header><b>v_adj_daily_prices</b><span class="n">11,252,462</span></header>
+<div class="sub">schema 與 v_daily_prices 同（14 欄）</div>
+</div>
+
+<div class="card" id="v_comb" data-col="3">
+<header><b>v_prices_combined</b><span class="n">11,751,428</span></header>
+<div class="sub">未還原 LEFT JOIN 還原，join 含分區鍵以保裁剪</div>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>open / high / low / close</b><span class="t">double</span></li>
+<li><b>adj_open / adj_high</b><span class="t">double</span></li>
+<li><b>adj_low / adj_close</b><span class="t">double</span></li>
+<li><b>volume</b><span class="t">bigint</span></li>
+<li><b>turnover_value</b><span class="t">bigint</span></li>
+<li><b>transactions</b><span class="t">bigint</span></li>
+<li><b>adj_factor</b><span class="t">double</span></li>
+<li><b>year</b><span class="pt">part</span><span class="t">int</span></li>
+<li><b>month</b><span class="pt">part</span><span class="t">int</span></li>
+</ul></div>
+
+<div class="card" id="v_enr" data-col="3">
+<header><b>v_daily_prices_enriched</b><span class="n">11,751,428</span></header>
+<div class="sub">價格 + 主檔（產業是「現在」的分類，非歷史當時）</div>
+<ul class="two">
+<li><b>（v_daily_prices 14 欄）</b></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>industry</b><span class="t">varchar</span></li>
+<li><b>type</b><span class="t">varchar</span></li>
+<li><b>is_index</b><span class="t">bool</span></li>
+<li><b>is_delisted</b><span class="t">bool</span></li>
+<li><b>delisted_date</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card macro" id="v_macros" data-col="3">
+<header><b>3 個 table macro</b></header>
+<ul>
+<li><b>daily_prices_between(lo, hi)</b></li>
+<li><b>adj_daily_prices_between(lo, hi)</b></li>
+<li><b>prices_combined_between(lo, hi)</b></li>
+</ul>
+<div class="sub">自動加 year 述詞裁剪分區，約快 4 倍——日期範圍查詢一律用這個</div>
+</div>
+
+<div class="card" id="v_hist" data-col="3">
+<header><b>v_stock_info_history</b><span class="n">4,331</span></header>
+<ul class="two">
+<li><b>snapshot_date</b><span class="t">date</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>industry_category</b><span class="t">varchar</span></li>
+<li><b>industry_category_norm</b><span class="t">varchar</span></li>
+<li><b>type</b><span class="t">varchar</span></li>
+<li><b>is_index</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="v_latest" data-col="3">
+<header><b>v_stock_info_latest</b><span class="n">3,149</span></header>
+<div class="sub">每檔最新一列（7 欄同上）・當下狀態，回測勿用</div>
+</div>
+
+<div class="card" id="v_sec" data-col="3">
+<header><b>v_securities</b><span class="n">3,117</span></header>
+<div class="sub">latest 排除指數（7 欄同上）</div>
+</div>
+
+<div class="card" id="v_idx" data-col="3">
+<header><b>v_indices</b><span class="n">32</span></header>
+<div class="sub">TAIEX、TPEx 等指數 pseudo-ticker（7 欄同上）</div>
+</div>
+
+<div class="card" id="v_delv" data-col="3">
+<header><b>v_delisted_securities</b><span class="n">767</span></header>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>delisted_date</b><span class="t">date</span></li>
+<li><b>shape</b><span class="t">varchar</span></li>
+<li><b>first_seen</b><span class="t">date</span></li>
+<li><b>last_seen</b><span class="t">date</span></li>
+<li><b>source</b><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="v_sec_all" data-col="3">
+<header><b>v_securities_all</b><span class="n">3,916</span></header>
+<div class="sub">latest ∪ delisted・<b>無存活者偏誤的回測 universe 用這張</b></div>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>industry_category</b><span class="t">varchar</span></li>
+<li><b>industry_category_norm</b><span class="t">varchar</span></li>
+<li><b>type</b><span class="t">varchar</span></li>
+<li><b>is_index</b><span class="t">bool</span></li>
+<li><b>is_delisted</b><span class="t">bool</span></li>
+<li><b>delisted_date</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card" id="v_industry" data-col="3">
+<header><b>v_industry</b><span class="n">6,892</span></header>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>industry</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>sub_industry</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>snapshot_date</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card" id="v_indstock" data-col="3">
+<header><b>v_industry_by_stock</b><span class="n">2,358</span></header>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>industries</b><span class="t">varchar[]</span></li>
+<li><b>sub_industries</b><span class="t">varchar[]</span></li>
+<li><b>last_seen</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card" id="v_calv" data-col="3">
+<header><b>v_trading_calendar</b><span class="n">8,141</span></header>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>source</b><span class="t">varchar</span></li>
+<li><b>year</b><span class="t">bigint</span></li>
+<li><b>month</b><span class="t">bigint</span></li>
+<li><b>day_of_week</b><span class="t">bigint</span></li>
+<li><b>is_weekend</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="v_lastday" data-col="3">
+<header><b>v_last_trading_day</b><span class="n">1</span></header>
+<ul><li><b>date</b><span class="t">date</span></li></ul></div>
+
+<div class="card" id="v_cov" data-col="3">
+<header><b>v_daily_coverage</b><span class="n">8,069</span></header>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>row_count</b><span class="t">bigint</span></li>
+<li><b>securities</b><span class="t">bigint</span></li>
+<li><b>last_ingested</b><span class="t">tstz</span></li>
+</ul></div>
+
+<div class="card" id="v_missing" data-col="3">
+<header><b>v_missing_trading_days</b><span class="n">0</span></header>
+<ul><li><b>date</b><span class="t">date</span></li></ul></div>
+
+<div class="card" id="v_thin" data-col="3">
+<header><b>v_thin_trading_days</b><span class="n">0</span></header>
+<ul class="two">
+<li><b>date</b><span class="t">date</span></li>
+<li><b>row_count</b><span class="t">bigint</span></li>
+<li><b>neighbour_median</b><span class="t">double</span></li>
+<li><b>ratio</b><span class="t">double</span></li>
+</ul></div>
+
+<div class="card" id="v_emptyv" data-col="3">
+<header><b>v_known_empty_days</b><span class="n">1</span></header>
+<ul class="two">
+<li><b>date</b><span class="t">date</span></li>
+<li><b>confirmed_at</b><span class="t">tstz</span></li>
+</ul></div>
+
+<div class="card" id="v_runs" data-col="3">
+<header><b>v_ingestion_runs</b><span class="n">39</span></header>
+<ul class="two">
+<li><b>job</b><span class="t">varchar</span></li>
+<li><b>status</b><span class="t">varchar</span></li>
+<li><b>started_at</b><span class="t">ts</span></li>
+<li><b>finished_at</b><span class="t">ts</span></li>
+<li><b>duration_seconds</b><span class="t">double</span></li>
+<li><b>host</b><span class="t">varchar</span></li>
+<li><b>metrics</b><span class="t">struct(40)</span></li>
+<li><b>errors</b><span class="t">varchar[]</span></li>
+<li><b>error_count</b><span class="t">bigint</span></li>
+</ul></div>
+</div>
+</div>
+<!-- edges injected by script -->
+</div></div>
+
+<!-- ═══════════════════════ TEJ ═══════════════════════ -->
+<h2 id="tej">tej_wizard.duckdb <span class="tag tej">20 views + 3 macros・零 table</span></h2>
+<p class="note">raw 層是 xlsx（35 欄／10 欄，中文表頭是逐字驗證的契約）；卡片上直接標出「Excel 欄位 → processed 欄名」的對照。xlsx 不可重製，是唯一真相。</p>
+
+<div class="diagram tej-d"><div class="canvas" id="cv-tej">
+<svg class="wires" aria-hidden="true"></svg>
+<div class="grid">
+
+<div class="lane"><h3>raw<small>db/tej-wizard/raw・~1.9 GB・TEJ 增益集寫入的 xlsx</small></h3>
+
+<div class="card" id="tr_px" data-col="1">
+<header><b>adj-daily-prices-ticker/&lt;id&gt;.xlsx</b><span class="n">2,453 本</span></header>
+<div class="sub">TEJ 表 waprcd1・一本 = 一檔證券全歷史・35 欄（A..AI）</div>
+<ul>
+<li><span class="xc">A</span><span class="zh">證券代碼</span><span class="en">→ stock_id + stock_name</span></li>
+<li><span class="xc">B</span><span class="zh">年月日</span><span class="en">→ date</span></li>
+<li><span class="xc">C</span><span class="zh">開盤價(元)</span><span class="en">→ open ⓐ</span></li>
+<li><span class="xc">D</span><span class="zh">最高價(元)</span><span class="en">→ high ⓐ</span></li>
+<li><span class="xc">E</span><span class="zh">最低價(元)</span><span class="en">→ low ⓐ</span></li>
+<li><span class="xc">F</span><span class="zh">收盤價(元)</span><span class="en">→ close ⓐ</span></li>
+<li><span class="xc">G</span><span class="zh">成交量(千股)</span><span class="en">→ volume_k_shares</span></li>
+<li><span class="xc">H</span><span class="zh">成交值(千元)</span><span class="en">→ turnover_k</span></li>
+<li><span class="xc">I</span><span class="zh">報酬率％</span><span class="en">→ return_pct</span></li>
+<li><span class="xc">J</span><span class="zh">週轉率％</span><span class="en">→ turnover_pct</span></li>
+<li><span class="xc">K</span><span class="zh">流通在外股數(千股)</span><span class="en">→ shares_outstanding_k</span></li>
+<li><span class="xc">L</span><span class="zh">市值(百萬元)</span><span class="en">→ market_cap_m</span></li>
+<li><span class="xc">M</span><span class="zh">最後揭示買價</span><span class="en">→ bid</span></li>
+<li><span class="xc">N</span><span class="zh">最後揭示賣價</span><span class="en">→ offer</span></li>
+<li><span class="xc">O</span><span class="zh">報酬率-Ln</span><span class="en">→ return_ln</span></li>
+<li><span class="xc">P</span><span class="zh">市值比重％</span><span class="en">→ market_cap_weight_pct</span></li>
+<li><span class="xc">Q</span><span class="zh">成交值比重％</span><span class="en">→ turnover_weight_pct</span></li>
+<li><span class="xc">R</span><span class="zh">成交筆數(筆)</span><span class="en">→ transactions</span></li>
+<li><span class="xc">S</span><span class="zh">本益比-TSE</span><span class="en">→ pe_tse</span></li>
+<li><span class="xc">T</span><span class="zh">本益比-TEJ</span><span class="en">→ pe_tej</span></li>
+<li><span class="xc">U</span><span class="zh">股價淨值比-TSE</span><span class="en">→ pbr_tse</span></li>
+<li><span class="xc">V</span><span class="zh">股價淨值比-TEJ</span><span class="en">→ pbr_tej</span></li>
+<li><span class="xc">W</span><span class="zh">漲跌停</span><span class="en">→ limit_flag</span></li>
+<li><span class="xc">X</span><span class="zh">股價營收比-TEJ</span><span class="en">→ psr_tej</span></li>
+<li><span class="xc">Y</span><span class="zh">股利殖利率-TSE</span><span class="en">→ div_yield_tse</span></li>
+<li><span class="xc">Z</span><span class="zh">現金股利率</span><span class="en">→ cash_div_yield</span></li>
+<li><span class="xc">AA</span><span class="zh">股價漲跌(元)</span><span class="en">→ price_change</span></li>
+<li><span class="xc">AB</span><span class="zh">高低價差%</span><span class="en">→ high_low_spread_pct</span></li>
+<li><span class="xc">AC</span><span class="zh">次日開盤參考價</span><span class="en">→ next_ref_price ⓤ</span></li>
+<li><span class="xc">AD</span><span class="zh">次日漲停價</span><span class="en">→ next_limit_up ⓤ</span></li>
+<li><span class="xc">AE</span><span class="zh">次日跌停價</span><span class="en">→ next_limit_down ⓤ</span></li>
+<li><span class="xc">AF</span><span class="zh">注意股票(A)</span><span class="en">→ attention_flag</span></li>
+<li><span class="xc">AG</span><span class="zh">處置股票(D)</span><span class="en">→ disposition_flag</span></li>
+<li><span class="xc">AH</span><span class="zh">全額交割(Y)</span><span class="en">→ full_delivery_flag</span></li>
+<li><span class="xc">AI</span><span class="zh">市場別</span><span class="en">→ market</span></li>
+</ul>
+<div class="sub">ⓐ = 還原價・ⓤ = 未還原原始報價（bid/offer 也是）——混用必錯</div>
+</div>
+
+<div class="card" id="tr_idx" data-col="1">
+<header><b>daily-index-constituents/&lt;IDX&gt;/&lt;YYYY&gt;.xlsx</b><span class="n">48 本</span></header>
+<div class="sub">TEJ 表 widxs・一本 = 一指數一年度・10 欄（A..J）・TWN50 25 本 + TM100 23 本</div>
+<ul>
+<li><span class="xc">A</span><span class="zh">公司代碼</span><span class="en">→ index_id + index_name</span></li>
+<li><span class="xc">B</span><span class="zh">年月日</span><span class="en">→ date</span></li>
+<li><span class="xc">C</span><span class="zh">成份股</span><span class="en">→ stock_id + stock_name</span></li>
+<li><span class="xc">D</span><span class="zh">指數因子</span><span class="en">→ index_factor</span></li>
+<li><span class="xc">E</span><span class="zh">公眾流通係數</span><span class="en">→ free_float_factor</span></li>
+<li><span class="xc">F</span><span class="zh">比重上限因子</span><span class="en">→ cap_factor</span></li>
+<li><span class="xc">G</span><span class="zh">股數</span><span class="en">→ shares（股，非千股）</span></li>
+<li><span class="xc">H</span><span class="zh">指數基值</span><span class="en">→ index_base_value</span></li>
+<li><span class="xc">I</span><span class="zh">前日調整收盤價</span><span class="en">→ prev_adj_close</span></li>
+<li><span class="xc">J</span><span class="zh">前日市值比重</span><span class="en">→ prev_weight_pct</span></li>
+</ul>
+<div class="sub">date 是生效日、資料是前一日的——成分領先價格一個交易日</div>
+</div>
+
+<div class="card extc" id="tr_comp" data-col="1">
+<header><b>company-info/company-info.xlsx</b><span class="n">3,555 家</span></header>
+<div class="sub">TEJ 公司主檔（外部輸入，本管線不更新）・決定公司池：曾上 TSE/OTC/創新板且 2000-09-04 後未下市 → 2,451 家 + 2 ETF</div>
+</div>
+
+<div class="card extc" id="tr_fmcal" data-col="1">
+<header><b>finmind expanded-tw-trading-dates</b></header>
+<div class="sub">跨管線相依：每日 refresh 用它決定要往 xlsx 插入哪些缺漏交易日</div>
+</div>
+
+<div class="card extc" id="tr_fea" data-col="1">
+<header><b>daily-0050-constituents/*.feather</b><span class="n">284,362 列</span></header>
+<div class="sub">只剩 ISIN 與 0050 ETF 自身 review 權重的用途・不出 view、不更新</div>
+</div>
+
+<div class="card extc" id="tr_logs" data-col="1">
+<header><b>logs/runs/*.jsonl</b><span class="n">54 筆</span></header>
+<div class="sub">RunManifest 執行紀錄</div>
+</div>
+</div>
+
+<div class="lane"><h3>processed<small>db/tej-wizard/processed・672 MB・每次全量重建</small></h3>
+
+<div class="card" id="tp_px" data-col="2">
+<header><b>adj-daily-prices/</b><span class="n">10,093,712 列・313 檔</span></header>
+<div class="sub">year=YYYY/month=MM/YYYY-MM.parquet（month 分區）・不去重、斷言鍵唯一</div>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>open / high / low / close</b><span class="t">double</span></li>
+<li><b>volume_k_shares</b><span class="t">double</span></li>
+<li><b>turnover_k</b><span class="t">double</span></li>
+<li><b>return_pct / return_ln</b><span class="t">double</span></li>
+<li><b>turnover_pct</b><span class="t">double</span></li>
+<li><b>shares_outstanding_k</b><span class="t">double</span></li>
+<li><b>market_cap_m</b><span class="t">double</span></li>
+<li><b>market_cap_weight_pct</b><span class="t">double</span></li>
+<li><b>turnover_weight_pct</b><span class="t">double</span></li>
+<li><b>transactions</b><span class="t">bigint</span></li>
+<li><b>pe_tse / pe_tej</b><span class="t">double</span></li>
+<li><b>pbr_tse / pbr_tej</b><span class="t">double</span></li>
+<li><b>psr_tej</b><span class="t">double</span></li>
+<li><b>div_yield_tse</b><span class="t">double</span></li>
+<li><b>cash_div_yield</b><span class="t">double</span></li>
+<li><b>price_change</b><span class="t">double</span></li>
+<li><b>high_low_spread_pct</b><span class="t">double</span></li>
+<li><b>bid / offer</b><span class="t">double</span></li>
+<li><b>next_ref_price</b><span class="t">double</span></li>
+<li><b>next_limit_up / _down</b><span class="t">double</span></li>
+<li><b>limit_flag</b><span class="t">varchar</span></li>
+<li><b>attention_flag</b><span class="t">varchar</span></li>
+<li><b>disposition_flag</b><span class="t">varchar</span></li>
+<li><b>full_delivery_flag</b><span class="t">varchar</span></li>
+<li><b>market</b><span class="t">varchar</span></li>
+<li><b>source_file</b><span class="t">varchar</span></li>
+<li><b>ingested_at</b><span class="t">tstz</span></li>
+<li><b>year</b><span class="pt">part</span><span class="t">bigint</span></li>
+<li><b>month</b><span class="pt">part</span><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="tp_idx" data-col="2">
+<header><b>index-constituents/</b><span class="n">834,748 列・291 檔</span></header>
+<div class="sub">month 分區・同指數年度檔不得重疊日期</div>
+<ul class="two">
+<li><b>index_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>index_name</b><span class="t">varchar</span></li>
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>index_factor</b><span class="t">double</span></li>
+<li><b>free_float_factor</b><span class="t">double</span></li>
+<li><b>cap_factor</b><span class="t">double</span></li>
+<li><b>shares</b><span class="t">double</span></li>
+<li><b>index_base_value</b><span class="t">double</span></li>
+<li><b>prev_adj_close</b><span class="t">double</span></li>
+<li><b>prev_weight_pct</b><span class="t">double</span></li>
+<li><b>source_file</b><span class="t">varchar</span></li>
+<li><b>ingested_at</b><span class="t">tstz</span></li>
+<li><b>year</b><span class="pt">part</span><span class="t">bigint</span></li>
+<li><b>month</b><span class="pt">part</span><span class="t">varchar</span></li>
+</ul></div>
+
+<div class="card" id="tp_inv" data-col="2">
+<header><b>workbook-inventory/</b><span class="n">2,453 列</span></header>
+<div class="sub">只讀 zip 中繼資料的檔案盤點（獨立對帳層）</div>
+<ul class="two">
+<li><b>source_file</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>file_bytes</b><span class="t">bigint</span></li>
+<li><b>modified_at</b><span class="t">tstz</span></li>
+<li><b>sheet_name</b><span class="t">varchar</span></li>
+<li><b>defined_name</b><span class="t">varchar</span></li>
+<li><b>defined_range</b><span class="t">varchar</span></li>
+<li><b>declared_rows</b><span class="t">bigint</span></li>
+<li><b>tej_table</b><span class="t">varchar</span></li>
+<li><b>tej_field_count</b><span class="t">bigint</span></li>
+<li><b>descending</b><span class="t">bool</span></li>
+<li><b>query_matches_contract</b><span class="t">bool</span></li>
+<li><b>scanned_at</b><span class="t">tstz</span></li>
+</ul></div>
+
+<div class="card" id="tp_iinv" data-col="2">
+<header><b>index-workbook-inventory/</b><span class="n">48 列</span></header>
+<div class="sub">同上，多 index_id / year 欄（14 欄）</div>
+</div>
+</div>
+
+<div class="lane"><h3>view<small>tej_wizard.duckdb・268 KB</small></h3>
+
+<div class="card" id="tv_px" data-col="3">
+<header><b>v_adj_daily_prices</b><span class="n">10,093,712</span></header>
+<div class="sub">價格主表 40 欄 = processed 38 欄重排 + year/month 轉 int</div>
+</div>
+
+<div class="card" id="tv_sec" data-col="3">
+<header><b>v_securities</b><span class="n">2,453</span></header>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>market</b><span class="t">varchar</span></li>
+<li><b>first_date</b><span class="t">date</span></li>
+<li><b>last_date</b><span class="t">date</span></li>
+<li><b>trading_days</b><span class="t">bigint</span></li>
+<li><b>is_current</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="tv_cal" data-col="3">
+<header><b>v_trading_calendar</b><span class="n">6,425</span></header>
+<ul><li><b>date</b><span class="t">date</span></li></ul></div>
+
+<div class="card" id="tv_last" data-col="3">
+<header><b>v_last_trading_day</b><span class="n">1</span></header>
+<ul><li><b>date</b><span class="t">date</span></li></ul></div>
+
+<div class="card" id="tv_cov" data-col="3">
+<header><b>v_daily_coverage</b><span class="n">6,425</span></header>
+<ul class="two">
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>row_count</b><span class="t">bigint</span></li>
+<li><b>securities</b><span class="t">bigint</span></li>
+<li><b>last_ingested</b><span class="t">tstz</span></li>
+</ul></div>
+
+<div class="card" id="tv_thin" data-col="3">
+<header><b>v_thin_trading_days</b><span class="n">0</span></header>
+<div class="sub">date, row_count, neighbour_median, ratio</div>
+</div>
+
+<div class="card" id="tv_gaps" data-col="3">
+<header><b>v_security_gaps</b><span class="n">67,707</span></header>
+<div class="sub">個股存續期內缺漏日（擴充後大增，多為停牌/暫停交易）</div>
+<ul class="two">
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>missing_date</b><span class="t">date</span></li>
+</ul></div>
+
+<div class="card" id="tv_wb" data-col="3">
+<header><b>v_workbooks</b><span class="n">2,453</span></header>
+<div class="sub">= workbook-inventory 直出（13 欄）</div>
+</div>
+
+<div class="card" id="tv_wbst" data-col="3">
+<header><b>v_workbook_status</b><span class="n">2,453</span></header>
+<div class="sub">inventory ⨝ processed 對帳：rows_delta、days_behind、is_current</div>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>source_file</b><span class="t">varchar</span></li>
+<li><b>modified_at</b><span class="t">tstz</span></li>
+<li><b>first_date / last_date</b><span class="t">date</span></li>
+<li><b>trading_days</b><span class="t">bigint</span></li>
+<li><b>declared_rows</b><span class="t">bigint</span></li>
+<li><b>rows_delta</b><span class="t">bigint</span></li>
+<li><b>is_current</b><span class="t">bool</span></li>
+<li><b>days_behind</b><span class="t">bigint</span></li>
+<li><b>query_matches_contract</b><span class="t">bool</span></li>
+<li><b>file_mb</b><span class="t">double</span></li>
+</ul></div>
+
+<div class="card" id="tv_ic" data-col="3">
+<header><b>v_index_constituents</b><span class="n">834,748</span></header>
+<div class="sub">成分主表 16 欄 = processed 重排 + 分區鍵轉 int・point-in-time 權威來源</div>
+</div>
+
+<div class="card" id="tv_mem" data-col="3">
+<header><b>v_index_membership</b><span class="n">462</span></header>
+<ul class="two">
+<li><b>index_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>first_date / last_date</b><span class="t">date</span></li>
+<li><b>days_in_index</b><span class="t">bigint</span></li>
+<li><b>latest_weight_pct</b><span class="t">double</span></li>
+<li><b>is_current</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="tv_uni" data-col="3">
+<header><b>v_index_universe</b><span class="n">367</span></header>
+<div class="sub">曾入選任一指數的證券，含本庫是否有還原價</div>
+<ul class="two">
+<li><b>stock_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>in_twn50</b><span class="t">bool</span></li>
+<li><b>in_tm100</b><span class="t">bool</span></li>
+<li><b>first_date / last_date</b><span class="t">date</span></li>
+<li><b>has_price_history</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="tv_ical" data-col="3">
+<header><b>v_index_calendar</b><span class="n">11,337</span></header>
+<div class="sub">index_id, date</div>
+</div>
+
+<div class="card" id="tv_ilast" data-col="3">
+<header><b>v_index_last_trading_day</b><span class="n">2</span></header>
+<div class="sub">index_id, date（成分領先價格一個交易日）</div>
+</div>
+
+<div class="card" id="tv_icov" data-col="3">
+<header><b>v_index_daily_coverage</b><span class="n">11,337</span></header>
+<ul class="two">
+<li><b>index_id</b><span class="pk">PK</span><span class="t">varchar</span></li>
+<li><b>date</b><span class="pk">PK</span><span class="t">date</span></li>
+<li><b>constituents</b><span class="t">bigint</span></li>
+<li><b>distinct_stocks</b><span class="t">bigint</span></li>
+<li><b>total_weight_pct</b><span class="t">double</span></li>
+<li><b>last_ingested</b><span class="t">tstz</span></li>
+</ul></div>
+
+<div class="card" id="tv_ithin" data-col="3">
+<header><b>v_thin_index_days</b><span class="n">0</span></header>
+<div class="sub">index_id, date, constituents, neighbour_median, ratio</div>
+</div>
+
+<div class="card" id="tv_ipg" data-col="3">
+<header><b>v_index_price_gaps</b><span class="n">39</span></header>
+<div class="sub">成分股當日無法定價的列（全是併購停牌）</div>
+<ul class="two">
+<li><b>index_id</b><span class="t">varchar</span></li>
+<li><b>date</b><span class="t">date</span></li>
+<li><b>stock_id</b><span class="t">varchar</span></li>
+<li><b>stock_name</b><span class="t">varchar</span></li>
+<li><b>has_price_history</b><span class="t">bool</span></li>
+</ul></div>
+
+<div class="card" id="tv_iwb" data-col="3">
+<header><b>v_index_workbooks</b><span class="n">48</span></header>
+<div class="sub">= index-workbook-inventory 直出（14 欄）</div>
+</div>
+
+<div class="card" id="tv_iwbst" data-col="3">
+<header><b>v_index_workbook_status</b><span class="n">48</span></header>
+<div class="sub">對帳：sessions、parsed_rows vs declared_rows、is_current_year</div>
+</div>
+
+<div class="card" id="tv_runs" data-col="3">
+<header><b>v_ingestion_runs</b><span class="n">54</span></header>
+<div class="sub">job, status, started/finished_at, duration, host, metrics struct(35), errors[]</div>
+</div>
+
+<div class="card macro" id="tv_macros" data-col="3">
+<header><b>3 個 table macro</b></header>
+<ul>
+<li><b>adj_daily_prices_between(lo, hi)</b></li>
+<li><b>index_constituents_between(lo, hi)</b></li>
+<li><b>index_members_on(idx, as_of)</b></li>
+</ul>
+<div class="sub">回測歷史指數用 index_members_on 取當日成分</div>
+</div>
+</div>
+</div>
+</div></div>
+
+<footer>
+Schema 直接 dump 自 finmind.duckdb 與 tej_wizard.duckdb（read_only）及 processed/raw Parquet，
+xlsx 欄位契約取自 <code>tej_pipeline/processing/schema.py</code>／<code>index_schema.py</code>・2026-09-29。
+tstz = TIMESTAMP WITH TIME ZONE。列數會隨每日更新變動。
+</footer>
+</div>
+
+<script>
+const EDGES = {
+ "cv-fm": [
+  ["r_dp","p_dp","rp"],["r_adp","p_adp","rp"],["r_info","p_info","rp"],
+  ["r_ind","p_ind","rp"],["r_cal","p_cal","rp"],["r_del","p_del","rp"],
+  ["r_disc","p_delsec","rp"],["p_del","p_delsec","rp"],["p_info","p_delsec","rp"],
+  ["p_dp","p_cal","rp"],
+  ["p_dp","v_dp","pv"],["p_adp","v_adp","pv"],["p_dp","v_comb","pv"],["p_adp","v_comb","pv"],
+  ["v_dp","v_enr","vv"],["v_sec_all","v_enr","vv"],
+  ["v_dp","v_macros","vv"],["v_adp","v_macros","vv"],["v_comb","v_macros","vv"],
+  ["p_info","v_hist","pv"],["p_info","v_latest","pv"],["p_info","v_sec","pv"],["p_info","v_idx","pv"],
+  ["p_delsec","v_delv","pv"],
+  ["v_latest","v_sec_all","vv"],["v_delv","v_sec_all","vv"],
+  ["p_ind","v_industry","pv"],["p_ind","v_indstock","pv"],
+  ["p_cal","v_calv","pv"],
+  ["p_dp","v_lastday","pv"],["p_dp","v_cov","pv"],
+  ["v_calv","v_missing","vv"],["v_cov","v_missing","vv"],["p_empty","v_missing","pv"],
+  ["v_cov","v_thin","vv"],
+  ["p_empty","v_emptyv","pv"],
+  ["r_logs","v_runs","ext"]
+ ],
+ "cv-tej": [
+  ["tr_px","tp_px","rp"],["tr_px","tp_inv","rp"],
+  ["tr_idx","tp_idx","rp"],["tr_idx","tp_iinv","rp"],
+  ["tr_comp","tr_px","ext"],["tr_fmcal","tr_px","ext"],["tr_fmcal","tr_idx","ext"],
+  ["tp_px","tv_px","pv"],["tp_px","tv_sec","pv"],["tp_px","tv_cal","pv"],
+  ["tp_px","tv_last","pv"],["tp_px","tv_cov","pv"],["tp_px","tv_thin","pv"],
+  ["tp_px","tv_gaps","pv"],
+  ["tp_inv","tv_wb","pv"],["tp_inv","tv_wbst","pv"],["tp_px","tv_wbst","pv"],
+  ["tp_idx","tv_ic","pv"],["tp_idx","tv_mem","pv"],
+  ["tp_idx","tv_uni","pv"],["tp_px","tv_uni","pv"],
+  ["tp_idx","tv_ical","pv"],["tp_idx","tv_ilast","pv"],["tp_idx","tv_icov","pv"],
+  ["tp_idx","tv_ithin","pv"],["tp_idx","tv_ipg","pv"],["tp_px","tv_ipg","pv"],
+  ["tp_iinv","tv_iwb","pv"],["tp_iinv","tv_iwbst","pv"],
+  ["tr_logs","tv_runs","ext"],
+  ["tv_px","tv_macros","vv"],["tv_ic","tv_macros","vv"]
+ ]
+};
+function accent(cv){ return getComputedStyle(document.body).getPropertyValue(
+  cv.id==="cv-fm" ? "--fm" : "--tej").trim(); }
+function muted(){ return getComputedStyle(document.body).getPropertyValue("--muted").trim(); }
+function draw(){
+ for (const cvId of Object.keys(EDGES)){
+  const cv = document.getElementById(cvId);
+  const svg = cv.querySelector("svg.wires");
+  const cvr = cv.getBoundingClientRect();
+  svg.setAttribute("width", cv.scrollWidth);
+  svg.setAttribute("height", cv.scrollHeight);
+  svg.setAttribute("viewBox", `0 0 ${cv.scrollWidth} ${cv.scrollHeight}`);
+  svg.innerHTML = "";
+  const ac = accent(cv), mu = muted();
+  for (const [from,to,cls] of EDGES[cvId]){
+   const a = document.getElementById(from), b = document.getElementById(to);
+   if(!a||!b) continue;
+   const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+   const ax = ra.left-cvr.left, ay = ra.top-cvr.top;
+   const bx = rb.left-cvr.left, by = rb.top-cvr.top;
+   let d;
+   if (rb.left - ra.right > 20){            // 往右：右緣中點 → 左緣中點
+    const x1 = ax+ra.width, y1 = ay+ra.height/2, x2 = bx, y2 = by+rb.height/2;
+    const mx = (x1+x2)/2;
+    d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+   } else if (ra.left - rb.right > 20){     // 往左
+    const x1 = ax, y1 = ay+ra.height/2, x2 = bx+rb.width, y2 = by+rb.height/2;
+    const mx = (x1+x2)/2;
+    d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+   } else {                                  // 同欄：側邊繞行
+    const right = a.dataset.col === "3";
+    const x1 = right ? ax+ra.width : ax, y1 = ay+ra.height/2;
+    const x2 = right ? bx+rb.width : bx, y2 = by+rb.height/2;
+    const off = right ? Math.max(x1,x2)+34 : Math.min(x1,x2)-34;
+    d = `M${x1},${y1} C${off},${y1} ${off},${y2} ${x2},${y2}`;
+   }
+   const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+   p.setAttribute("d", d);
+   p.setAttribute("class", cls);
+   p.setAttribute("data-from", from); p.setAttribute("data-to", to);
+   p.setAttribute("stroke", cls==="ext" ? mu : ac);
+   if (cls==="pv") p.setAttribute("opacity",".5");
+   if (cls==="vv") p.setAttribute("opacity",".7");
+   svg.appendChild(p);
+  }
+ }
+}
+function wireHover(){
+ for (const cvId of Object.keys(EDGES)){
+  const cv = document.getElementById(cvId);
+  cv.querySelectorAll(".card").forEach(card=>{
+   card.addEventListener("mouseenter", ()=>{
+    const id = card.id;
+    const hot = new Set([id]);
+    cv.querySelectorAll("svg.wires path").forEach(p=>{
+     const m = p.dataset.from===id || p.dataset.to===id;
+     p.classList.toggle("hot", m);
+     if (m){ hot.add(p.dataset.from); hot.add(p.dataset.to); }
+    });
+    cv.querySelectorAll(".card").forEach(c=>c.classList.toggle("hot", hot.has(c.id)));
+    cv.classList.add("dimmed");
+   });
+   card.addEventListener("mouseleave", ()=>{
+    cv.classList.remove("dimmed");
+    cv.querySelectorAll(".hot").forEach(e=>e.classList.remove("hot"));
+   });
+  });
+ }
+}
+let rt;
+addEventListener("resize", ()=>{ clearTimeout(rt); rt = setTimeout(draw, 120); });
+addEventListener("DOMContentLoaded", ()=>{ draw(); wireHover(); });
+addEventListener("load", draw);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+const mq = matchMedia("(prefers-color-scheme: dark)");
+if (mq.addEventListener) mq.addEventListener("change", draw);
+</script>
+
+</body></html>

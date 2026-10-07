@@ -41,7 +41,9 @@ comparison exposed and that has since been fixed with regression tests).
 | 完整專案說明（23 頁） | [`docs/financial-db-專案說明書.pdf`](docs/financial-db-專案說明書.pdf) |
 | 簡報版（29 頁） | [`docs/financial-db-專案簡報.pdf`](docs/financial-db-專案簡報.pdf) |
 | 兩個來源哪裡不同、誰比較可信（資料科學部分） | 本文〈[跨來源驗證](#跨來源驗證finmind-與-tej-哪裡不同誰是對的)〉→ [`analysis/README.md`](analysis/README.md) → 程式 [`02_source_comparison.py`](analysis/scripts/02_source_comparison.py) |
-| 資料庫怎麼選、view 與陷阱 | [`pipelines/README.md`](pipelines/README.md)、[`docs/data-map.md`](docs/data-map.md)、[`docs/schema-map.md`](docs/schema-map.md) |
+| **互動式資料地圖**（資料流、兩庫對照、排程時間軸、建置指令） | [線上版](https://brianwen818.github.io/financial-db-public/docs/data-map.html)（[claude.ai 版](https://claude.ai/artifact/GqF3hpkMRJ9nmH1Rrkae64)）・[Markdown 版](docs/data-map.md) |
+| **互動式 Schema 圖**（raw／processed／view 三層血緣，滑鼠移到表上亮起上下游） | [線上版](https://brianwen818.github.io/financial-db-public/docs/schema-map.html)（[claude.ai 版](https://claude.ai/artifact/XpiSgGeqyfSWwNq79Y4BVT)）・[Markdown 版](docs/schema-map.md) |
+| 資料庫怎麼選、view 與陷阱 | [`pipelines/README.md`](pipelines/README.md) |
 | 管線程式碼 | [`pipelines/finmind/src/finmind_pipeline/`](pipelines/finmind/src/finmind_pipeline/)、[`pipelines/tej-wizard/src/tej_pipeline/`](pipelines/tej-wizard/src/tej_pipeline/) |
 | SQL view 與 macro | [`pipelines/finmind/sql/`](pipelines/finmind/sql/)、[`pipelines/tej-wizard/sql/`](pipelines/tej-wizard/sql/) |
 | 測試 | [`pipelines/finmind/tests/`](pipelines/finmind/tests/)（210）、[`pipelines/tej-wizard/tests/`](pipelines/tej-wizard/tests/)（76） |
@@ -195,7 +197,7 @@ TEJ 一側則保留 462 檔已停止交易證券的完整還原歷史。
 ```
 financial-db-public/
 ├── README.md                 本文
-├── docs/                     專案說明書、簡報（PDF + 原檔）、資料地圖、Schema 圖
+├── docs/                     專案說明書、簡報（PDF + 原檔）、互動式資料地圖與 Schema 圖（.html，GitHub Pages 可直接開）及其 Markdown 版
 ├── pipelines/
 │   ├── README.md             兩個資料庫的選用指南、處理步驟、view 清單、陷阱、指令
 │   ├── finmind/              FinMind API → Parquet → DuckDB   (src / sql / scripts / tests / docs / notebooks)

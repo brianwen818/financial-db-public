@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>financial-db 資料地圖</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --ink:#212930; --muted:#5B6670; --line:#D8DEE2;
+  --fm:#0E6E8C; --fm-soft:#E2EFF4; --tej:#B25417; --tej-soft:#F6EADE;
+  --warn:#AF2A20; --warn-soft:#F8E8E6; --ok:#2E7D46; --ok-soft:#E6F1E9;
+  --code-bg:#ECEFF1; --head-bg:rgba(244,246,245,.92);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13181C; --surface:#1B2228; --ink:#E4E9EC; --muted:#96A1AA; --line:#323C44;
+    --fm:#54B4D3; --fm-soft:#12303B; --tej:#E08B4E; --tej-soft:#382413;
+    --warn:#E5766C; --warn-soft:#3A1E1B; --ok:#6FBF87; --ok-soft:#1E3226;
+    --code-bg:#222B32; --head-bg:rgba(19,24,28,.92);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13181C; --surface:#1B2228; --ink:#E4E9EC; --muted:#96A1AA; --line:#323C44;
+  --fm:#54B4D3; --fm-soft:#12303B; --tej:#E08B4E; --tej-soft:#382413;
+  --warn:#E5766C; --warn-soft:#3A1E1B; --ok:#6FBF87; --ok-soft:#1E3226;
+  --code-bg:#222B32; --head-bg:rgba(19,24,28,.92);
+  color-scheme:dark;
+}
+body{
+  background:var(--bg); color:var(--ink); margin:0;
+  font-family:"IBM Plex Sans","Noto Sans TC",system-ui,sans-serif;
+  font-size:15px; line-height:1.75;
+}
+img{max-width:100%}
+.wrap{max-width:1060px; margin:0 auto; padding-inline:20px; padding-block:0 72px;}
+header.site{
+  position:sticky; top:0; z-index:20;
+  background:var(--head-bg); backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+}
+header.site .bar{
+  max-width:1060px; margin:0 auto; padding:10px 20px;
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 18px;
+}
+header.site .name{font-weight:700; font-size:16px; letter-spacing:.02em;}
+header.site nav{display:flex; flex-wrap:wrap; gap:2px 14px; font-size:13px;}
+header.site nav a{color:var(--muted); text-decoration:none;}
+header.site nav a:hover{color:var(--ink);}
+h1{font-size:30px; line-height:1.3; margin:40px 0 6px; text-wrap:balance;}
+h2{font-size:22px; margin:56px 0 12px; text-wrap:balance;
+   padding-top:8px; border-top:2px solid var(--line);}
+h3{font-size:17px; margin:30px 0 8px;}
+h2 .tag{font-size:12px; font-weight:600; letter-spacing:.08em; vertical-align:3px;
+  padding:2px 8px; border-radius:99px; margin-left:8px;}
+.tag.fm{background:var(--fm-soft); color:var(--fm);}
+.tag.tej{background:var(--tej-soft); color:var(--tej);}
+p{max-width:72ch;}
+.lede{color:var(--muted); font-size:16px; max-width:72ch; margin-top:0;}
+a{color:var(--fm);}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.88em;
+  background:var(--code-bg); padding:1px 5px; border-radius:4px;}
+pre{background:var(--code-bg); border:1px solid var(--line); border-radius:8px;
+  padding:14px 16px; overflow-x:auto; line-height:1.6;}
+pre code{background:none; padding:0; font-size:12.5px;}
+table{border-collapse:collapse; width:100%; font-size:13.5px;}
+.tblwrap{overflow-x:auto; margin:14px 0;}
+th,td{border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top;}
+th{background:var(--code-bg); font-weight:600; white-space:nowrap;}
+td{font-variant-numeric:tabular-nums;}
+td code{white-space:nowrap;}
+.callout{border:1px solid var(--line); border-left:4px solid var(--muted);
+  background:var(--surface); border-radius:0 8px 8px 0; padding:12px 16px; margin:16px 0; max-width:none;}
+.callout.warn{border-left-color:var(--warn); background:var(--warn-soft);}
+.callout.tejc{border-left-color:var(--tej); background:var(--tej-soft);}
+.callout.okc{border-left-color:var(--ok); background:var(--ok-soft);}
+.callout p{margin:4px 0;}
+.callout .t{font-weight:700;}
+figure{margin:22px 0; background:var(--surface); border:1px solid var(--line);
+  border-radius:10px; padding:16px;}
+figure .scroll{overflow-x:auto;}
+figure svg{max-width:100%; height:auto; display:block; min-width:640px;}
+figcaption{color:var(--muted); font-size:13px; margin-top:10px; line-height:1.6;}
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin:18px 0;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+.card .k{font-size:12px; letter-spacing:.08em; color:var(--muted); font-weight:600; text-transform:uppercase;}
+.card .v{font-size:22px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums;}
+.card .s{font-size:12.5px; color:var(--muted); margin-top:2px;}
+ul{max-width:78ch;}
+li{margin:4px 0;}
+.small{font-size:13px; color:var(--muted);}
+footer{margin-top:64px; border-top:1px solid var(--line); padding-top:16px;
+  color:var(--muted); font-size:12.5px;}
+@media (max-width:640px){ h1{font-size:24px;} h2{font-size:19px;} }
+</style>
+</head>
+<body>
+
+<header class="site"><div class="bar">
+  <span class="name">financial-db 資料地圖</span>
+  <nav>
+    <a href="#overview">總覽</a><a href="#compare">兩庫對照</a>
+    <a href="#finmind">FinMind</a><a href="#tej">TEJ</a>
+    <a href="#schedule">更新排程</a><a href="#build">從零建置</a>
+    <a href="#query">查詢方式</a><a href="#docs">文件地圖</a>
+  </nav>
+</div></header>
+
+<div class="wrap">
+
+<h1>兩條台股資料管線，一套分層契約</h1>
+<p class="lede">
+個人財經資料庫 <code>financial-db</code> 的完整架構：raw 層原樣保存、processed 層定型去重分區、
+DuckDB 只放 view 零 table、Windows 工作排程每日更新。本頁整理自程式碼與資料庫實測
+（2026-09-29），數字以實測為準，repo README 的快照值（09-03）已部分過時。
+</p>
+
+<div class="callout warn">
+  <p class="t">🔴 FinMind 管線自 2026-09-19 起故障中</p>
+  <p>FinMind token 已從 Sponsor 降為 <b>Free tier</b>，每次 API 呼叫回
+  <code>HTTP 400: Your level is register</code>。09-19 之後每日／每週排程全數失敗，
+  <b>價格資料停在 2026-09-16</b>。另外 rate limiter 仍按 6,000/hr 配置（Free 上限 600/hr），
+  修復訂閱後若維持 Free 需將 <code>FINMIND_API_HOUR_LIMIT</code> 改為 600。
+  失敗紀錄在 <code>db/finmind/logs/runs/*.jsonl</code>，可用 <code>v_ingestion_runs</code> 查。</p>
+</div>
+<div class="callout tejc">
+  <p class="t">🟠 TEJ 於 2026-09-28 完成大擴充，兩件事要注意</p>
+  <p>① universe 從「指數成分 365 檔」擴為<b>全公司池 2,453 檔／10,093,712 列</b>
+  （TSE／OTC／創新板曾上市、2000-09-04 後未下市的公司 + 0050/0051），README 的舊數字不再適用。
+  ② <b>每日排程「TEJ daily update」至今未註冊</b>，目前只有每週日全量在自動跑；
+  且全量重抓從約 2 小時變為<b>約 8 小時</b>（2,453 本 workbook）。</p>
+</div>
+
+<h2 id="overview">總覽：資料怎麼流</h2>
+<p>
+兩條管線互相獨立、契約相同：<b>raw</b>（來源給什麼存什麼，一字不改）→
+<b>processed</b>（定型、去重、Hive 分區的 Parquet，這才是查詢契約）→
+<b>DuckDB</b>（純 view 層蓋在 Parquet 上，268 KB，可刪掉重建）。
+唯一的相依是 TEJ 更新前要讀 FinMind 的交易日曆。
+</p>
+
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 980 470" role="img" aria-label="兩條管線的資料流：FinMind API 與 TEJ Excel 增益集各自經 raw、processed 到 DuckDB view 層；TEJ 更新前讀 FinMind 的交易日曆">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g fill="var(--muted)" font-size="12" text-anchor="middle" font-weight="600" letter-spacing="1">
+    <text x="105" y="22">來源</text><text x="345" y="22">raw 層</text>
+    <text x="595" y="22">processed 層</text><text x="860" y="22">DuckDB view 層</text>
+  </g>
+
+  <text x="20" y="46" font-size="13" font-weight="700" fill="var(--fm)">FinMind（台股全市場）</text>
+  <g stroke="var(--fm)" fill="var(--fm-soft)" stroke-width="1.5">
+    <rect x="20" y="56" width="170" height="96" rx="8"/>
+    <rect x="260" y="56" width="170" height="96" rx="8"/>
+    <rect x="500" y="56" width="190" height="96" rx="8"/>
+    <rect x="760" y="56" width="200" height="96" rx="8"/>
+  </g>
+  <g font-size="12.5" fill="var(--ink)" text-anchor="middle">
+    <text x="105" y="78" font-weight="600">FinMind API v4</text>
+    <text x="105" y="98" font-size="11.5">6 個 endpoint</text>
+    <text x="105" y="114" font-size="11.5">+ 已下市月抽樣掃描</text>
+    <text x="105" y="130" font-size="11.5">Bearer token</text>
+    <text x="345" y="78" font-weight="600">raw/ Parquet</text>
+    <text x="345" y="98" font-size="11.5">原樣落地，欄名照舊</text>
+    <text x="345" y="114" font-size="11.5">ticker 檔 + 全市場日檔</text>
+    <text x="345" y="130" font-size="11.5">658 MB / 6,848 檔</text>
+    <text x="595" y="78" font-weight="600">processed/ Parquet</text>
+    <text x="595" y="98" font-size="11.5">定型・去重・day 分區</text>
+    <text x="595" y="114" font-size="11.5">year=/month=/日.parquet</text>
+    <text x="595" y="130" font-size="11.5">1.1 GB（+ 交易日曆）</text>
+    <text x="860" y="78" font-weight="600">finmind.duckdb</text>
+    <text x="860" y="98" font-size="11.5">19 views + 3 macros</text>
+    <text x="860" y="114" font-size="11.5">零 table，268 KB</text>
+    <text x="860" y="130" font-size="11.5">read_only 查詢</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+    <line x1="190" y1="104" x2="257" y2="104"/>
+    <line x1="430" y1="104" x2="497" y2="104"/>
+    <line x1="690" y1="104" x2="757" y2="104"/>
+  </g>
+  <g font-size="10.5" fill="var(--muted)" text-anchor="middle">
+    <text x="223" y="96">requests +</text><text x="223" y="122">rate limiter</text>
+    <text x="463" y="96">rebuild /</text><text x="463" y="122">market day</text>
+    <text x="723" y="96">build_db.py</text><text x="723" y="122">純 view</text>
+  </g>
+
+  <text x="20" y="290" font-size="13" font-weight="700" fill="var(--tej)">TEJ（公司池還原價 + 指數成分）</text>
+  <g stroke="var(--tej)" fill="var(--tej-soft)" stroke-width="1.5">
+    <rect x="20" y="300" width="170" height="96" rx="8"/>
+    <rect x="260" y="300" width="170" height="96" rx="8"/>
+    <rect x="500" y="300" width="190" height="96" rx="8"/>
+    <rect x="760" y="300" width="200" height="96" rx="8"/>
+  </g>
+  <g font-size="12.5" fill="var(--ink)" text-anchor="middle">
+    <text x="105" y="322" font-weight="600">TEJ Smart Wizard</text>
+    <text x="105" y="342" font-size="11.5">Excel 增益集，COM 驅動</text>
+    <text x="105" y="358" font-size="11.5">隱藏 desktop 執行</text>
+    <text x="105" y="374" font-size="11.5">無 API、無 .env</text>
+    <text x="345" y="322" font-weight="600">raw/ xlsx</text>
+    <text x="345" y="342" font-size="11.5">唯一真相，不可重製</text>
+    <text x="345" y="358" font-size="11.5">2,453 價格 + 48 指數檔</text>
+    <text x="345" y="374" font-size="11.5">~1.9 GB / 2,503 檔</text>
+    <text x="595" y="322" font-weight="600">processed/ Parquet</text>
+    <text x="595" y="342" font-size="11.5">定型・驗證鍵唯一</text>
+    <text x="595" y="358" font-size="11.5">month 分區，每次全量重建</text>
+    <text x="595" y="374" font-size="11.5">662 MB + 9.4 MB</text>
+    <text x="860" y="322" font-weight="600">tej_wizard.duckdb</text>
+    <text x="860" y="342" font-size="11.5">20 views + 3 macros</text>
+    <text x="860" y="358" font-size="11.5">零 table，268 KB</text>
+    <text x="860" y="374" font-size="11.5">read_only 查詢</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+    <line x1="190" y1="348" x2="257" y2="348"/>
+    <line x1="430" y1="348" x2="497" y2="348"/>
+    <line x1="690" y1="348" x2="757" y2="348"/>
+  </g>
+  <g font-size="10.5" fill="var(--muted)" text-anchor="middle">
+    <text x="223" y="340">seed 缺漏日</text><text x="223" y="366">+ Refresh</text>
+    <text x="463" y="340">rebuild.py</text><text x="463" y="366">streaming XML</text>
+    <text x="723" y="340">build_db.py</text><text x="723" y="366">純 view</text>
+  </g>
+
+  <path d="M 560 152 C 560 240, 130 220, 107 296" stroke="var(--fm)" stroke-width="1.5"
+        stroke-dasharray="6 4" fill="none" marker-end="url(#arr)" style="color:var(--fm)"/>
+  <text x="360" y="215" font-size="11.5" fill="var(--fm)" text-anchor="middle">TEJ 更新前讀 finmind 的 expanded-tw-trading-dates</text>
+  <text x="360" y="232" font-size="11.5" fill="var(--fm)" text-anchor="middle">決定要往 xlsx 插入哪些缺漏交易日（finmind 壞了 TEJ 也更新不了）</text>
+</svg>
+</div>
+<figcaption>整體資料流。兩邊 DuckDB 檔都只有 268 KB，因為一張表都沒有——刪掉重跑
+<code>build_db.py</code> 就回來。FinMind 的 raw 可以重抓；<b>TEJ 的 xlsx 是唯一真相</b>，更新前自動備份到 <code>temp/workbook-backup/</code>（保留最近兩組）。</figcaption>
+</figure>
+
+<div class="cards">
+  <div class="card"><div class="k">FinMind 未還原價</div><div class="v">11,751,428 列</div>
+    <div class="s">3,614 檔・1994-10-01 → 2026-09-16（8,069 交易日）</div></div>
+  <div class="card"><div class="k">FinMind 還原價</div><div class="v">11,252,462 列</div>
+    <div class="s">3,154 檔・survivors-only（下市僅 7 檔有還原價）</div></div>
+  <div class="card"><div class="k">TEJ 還原價</div><div class="v">10,093,712 列</div>
+    <div class="s">2,453 檔・2000-09-04 → 2026-09-24・停止交易 461 檔全保留</div></div>
+  <div class="card"><div class="k">TEJ 指數成分</div><div class="v">834,748 列</div>
+    <div class="s">TWN50 自 2002-07-05・TM100 自 2004-11-30，每日 point-in-time</div></div>
+</div>
+
+<h2 id="compare">先選對資料庫：兩庫對照</h2>
+<div class="tblwrap"><table>
+<tr><th></th><th>finmind</th><th>tej-wizard</th></tr>
+<tr><td>來源</td><td>FinMind API v4（HTTP + Bearer token）</td><td>TEJ Smart Wizard Excel 增益集（COM 自動化，登入存在增益集 session 裡）</td></tr>
+<tr><td>涵蓋</td><td>全市場 3,916 檔（twse／tpex／興櫃，含 32 檔指數、ETF、特別股…）</td><td>公司池 2,453 檔（TSE／OTC／創新板公司 + 0050/0051；刻意排除純興櫃）＋ TWN50/TM100 每日成分</td></tr>
+<tr><td>期間</td><td>1994-10-01 起</td><td>2000-09-04 起</td></tr>
+<tr><td>還原價存活者偏誤</td><td><b>有，且修不了</b>（767 檔已下市只有 7 檔有還原價，API 上游缺）</td><td><b>無</b>（461 檔停止交易者皆保有完整還原歷史）</td></tr>
+<tr><td>每列欄位</td><td>精簡：OHLCV + 成交值/筆數</td><td>豐富：40 欄（估值 PER/PBR/PSR、殖利率、權重、漲跌停、注意/處置旗標…）</td></tr>
+<tr><td>未還原價</td><td>另一張表 <code>v_daily_prices</code>（含下市 466 檔，2004-02-11 起 universe 完整）</td><td>只有 OHLC 是還原價；同列 <code>bid/offer/next_ref_price</code> 等是未還原原始報價</td></tr>
+<tr><td>raw 可重製</td><td>可以，重抓就好</td><td><b>不行</b>，xlsx 是唯一真相，更新前先備份</td></tr>
+<tr><td>Python 環境</td><td>專案 venv（<code>.venv</code>）</td><td>anaconda <code>py312</code>（需 pywin32 驅動 Excel）</td></tr>
+</table></div>
+<p class="small">選 finmind：全市場橫斷面、選股池、產業分類、2000 年以前歷史。選 tej-wizard：無偏誤還原價、估值與權重欄位、每日 point-in-time 指數成分。</p>
+
+<!-- ═══════════════ FinMind ═══════════════ -->
+<h2 id="finmind">FinMind 管線 <span class="tag fm">API → Parquet → View</span></h2>
+
+<h3>① 取得：抓什麼、怎麼抓</h3>
+<p>資料集註冊在 <code>config/datasets.yml</code>（<code>history_start: 1994-10-01</code>）。
+客戶端 <code>utils/finmind_client.py</code> 用原生 requests（不用官方 SDK，避免它自己 throttle 打架），
+搭配跨行程 token-bucket 限流器（<code>state/rate_limit.json</code>，預算 = 時數上限 × 0.9）。
+402 退避重試 8 次、429/5xx 指數退避 5 次。</p>
+<div class="tblwrap"><table>
+<tr><th>dataset key</th><th>FinMind endpoint</th><th>抓法</th><th>落地</th></tr>
+<tr><td><code>daily_prices</code></td><td>TaiwanStockPrice</td><td rowspan="2">回補：ticker 模式，一次呼叫拿一檔全歷史。<br>每日：market 模式，一次呼叫拿全市場一天。</td><td>raw/daily-prices-ticker（3,602 檔）+ raw/daily-prices-market</td></tr>
+<tr><td><code>adj_daily_prices</code></td><td>TaiwanStockPriceAdj</td><td>raw/adj-daily-prices-ticker（3,154 檔）+ raw/adj-daily-prices-market</td></tr>
+<tr><td><code>tw_stock_info</code></td><td>TaiwanStockInfo</td><td>single：整包一次抓，快照檔</td><td>raw/tw-stock-info/&lt;日期&gt;.parquet</td></tr>
+<tr><td><code>tw_industry</code></td><td>TaiwanStockIndustryChain</td><td>single 快照</td><td>raw/tw-industry</td></tr>
+<tr><td><code>tw_trading_dates</code></td><td>TaiwanStockTradingDate</td><td>single 快照（官方日曆發布到年底）</td><td>raw/tw-trading-dates</td></tr>
+<tr><td><code>tw_delisting</code></td><td>TaiwanStockDelisting</td><td>single 快照（每週）</td><td>raw/tw-delisting</td></tr>
+<tr><td><code>discovered_universe</code></td><td>重用 TaiwanStockPrice</td><td>2004-02-11 起每月抽一個交易日全市場掃描（271 次呼叫），記下看過的所有代碼——為了修存活者偏誤</td><td>raw/discovered-universe</td></tr>
+</table></div>
+<p class="small">沒有抓的：財報、三大法人、融資券、股利明細、分價量表、盤中/分鐘資料。
+raw 層一律 Parquet（zstd-3），欄名照上游（<code>max</code>、<code>min</code>、<code>Trading_Volume</code>…），日期留字串，寫入走 <code>.tmp</code> + <code>os.replace</code> 原子換檔。</p>
+
+<h3>② 處理：raw → processed</h3>
+<p>價格（<code>processing/prices.py</code>）四步驟：</p>
+<ul>
+<li><b>改名 + 定型</b> — <code>max→high</code>、<code>min→low</code>、<code>Trading_Volume→volume</code>、<code>Trading_money→turnover_value</code>、<code>Trading_turnover→transactions</code>；日期轉 DATE、金額轉 BIGINT；<b><code>stock_id</code> 刻意留 VARCHAR</b>（<code>0050</code>、<code>00679B</code>、<code>TAIEX</code> 轉數字就壞了）。</li>
+<li><b>過濾範圍</b> — 全市場單日回約 43,700 個代碼，依代碼形狀只留 common + etf，丟掉權證與 TDR（約 4 萬個代碼/日）。</li>
+<li><b>重新分區</b> — 從「一檔一個檔案」翻轉成「一天一個檔案」：<code>year=YYYY/month=MM/YYYY-MM-DD.parquet</code>。這是查詢效能的基礎。</li>
+<li><b>去重</b> — 同一 <code>(stock_id, date)</code> 可能同時來自 ticker 檔與全市場檔，<code>ROW_NUMBER()</code> 留一筆、<b>全市場優先</b>（收盤後權威快照）。全量重建走 staging 目錄 + 原子 swap。</li>
+</ul>
+<p>維度各有自然鍵，不是 <code>SELECT DISTINCT *</code>：<code>tw_stock_info</code> 以全部內容欄位去重（<code>min()</code>=首見日）、<code>tw_industry</code> 以 <code>(stock_id, industry, sub_industry)</code>（<code>max()</code>=最後看到）。
+三個是<b>算出來的</b>：交易日曆 1994–1998 段由觀測價格日期反推（含週六盤）；已下市清單 = 掃描 ∪ 下市公告 − 現有主檔；確認休市日（目前 1 天）。</p>
+
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 980 130" role="img" aria-label="FinMind 處理順序：維度 ingest、價格 ingest、價格 processing、交易日曆、已下市清單、build views，順序不能換">
+  <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <g stroke="var(--fm)" fill="var(--fm-soft)" stroke-width="1.5">
+    <rect x="15" y="22" width="135" height="52" rx="8"/><rect x="175" y="22" width="135" height="52" rx="8"/>
+    <rect x="335" y="22" width="135" height="52" rx="8"/><rect x="495" y="22" width="135" height="52" rx="8"/>
+    <rect x="655" y="22" width="135" height="52" rx="8"/><rect x="815" y="22" width="135" height="52" rx="8"/>
+  </g>
+  <g font-size="12" fill="var(--ink)" text-anchor="middle" font-weight="600">
+    <text x="82" y="44">① 維度 ingest</text><text x="242" y="44">② 價格 ingest</text>
+    <text x="402" y="44">③ 價格 processing</text><text x="562" y="44">④ 交易日曆</text>
+    <text x="722" y="44">⑤ 已下市清單</text><text x="882" y="44">⑥ build views</text>
+  </g>
+  <g font-size="10.5" fill="var(--muted)" text-anchor="middle">
+    <text x="82" y="62">主檔/產業/日曆快照</text><text x="242" y="62">ticker 或 market</text>
+    <text x="402" y="62">定型去重分區</text><text x="562" y="62">官方 ∪ 觀測反推</text>
+    <text x="722" y="62">掃描∪公告−主檔</text><text x="882" y="62">build_db.py</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#arr2)">
+    <line x1="150" y1="48" x2="172" y2="48"/><line x1="310" y1="48" x2="332" y2="48"/>
+    <line x1="470" y1="48" x2="492" y2="48"/><line x1="630" y1="48" x2="652" y2="48"/>
+    <line x1="790" y1="48" x2="812" y2="48"/>
+  </g>
+  <text x="482" y="105" font-size="11.5" fill="var(--muted)" text-anchor="middle">順序不能換：維度先於價格（過濾要用最新名單）・價格先於日曆（早期日曆由價格反推）・主檔先於已下市（要相減）</text>
+  <text x="482" y="122" font-size="11.5" fill="var(--muted)" text-anchor="middle"><tspan font-family="IBM Plex Mono,monospace">process_all_dimensions()</tspan> 把這個順序寫死</text>
+</svg>
+</div>
+<figcaption>處理順序是硬相依，<code>discover_delisted.py</code> 在空倉庫直接跑會 <code>FileNotFoundError</code>（要先有一次維度 ingest 建起日曆）。</figcaption>
+</figure>
+
+<h3>③ 產出：19 個 view + 3 個 macro</h3>
+<p>由 <code>build_db.py</code> 依檔名順序執行 <code>sql/**/*.sql</code>（<code>{{DB_ROOT}}</code> 代換資料根目錄），全部 <code>CREATE OR REPLACE</code>。</p>
+<div class="tblwrap"><table>
+<tr><th>分組</th><th>View</th><th>重點</th></tr>
+<tr><td>價格</td><td><code>v_daily_prices</code>・<code>v_adj_daily_prices</code>・<code>v_prices_combined</code>・<code>v_daily_prices_enriched</code></td><td>未還原／還原／並列（含 <code>adj_factor</code>）／join 主檔與產業。都帶 <code>year</code>/<code>month</code> 分區鍵。</td></tr>
+<tr><td>證券主檔</td><td><code>v_securities_all</code>・<code>v_securities</code>・<code>v_indices</code>・<code>v_stock_info_latest</code>・<code>v_stock_info_history</code>・<code>v_delisted_securities</code></td><td><b>回測 universe 用 <code>v_securities_all</code></b>（3,916 = 在市 ∪ 已下市 767），不是 <code>v_stock_info_latest</code>（會有存活者偏誤）。</td></tr>
+<tr><td>產業/日曆</td><td><code>v_industry</code>・<code>v_industry_by_stock</code>・<code>v_trading_calendar</code>・<code>v_last_trading_day</code></td><td>日曆 8,141 天（1994→2026-12-31），<code>source</code> 標 finmind/derived。</td></tr>
+<tr><td>維運</td><td><code>v_daily_coverage</code>・<code>v_missing_trading_days</code>・<code>v_thin_trading_days</code>・<code>v_known_empty_days</code>・<code>v_ingestion_runs</code></td><td>缺日／稀薄日目前都是 0；<code>v_ingestion_runs</code> 讀 <code>logs/runs/*.jsonl</code>，查排程失敗就靠它。</td></tr>
+</table></div>
+<p>Macro：<code>daily_prices_between(lo,hi)</code>、<code>adj_daily_prices_between(lo,hi)</code>、<code>prices_combined_between(lo,hi)</code>——自動加 <code>year BETWEEN</code> 述詞做分區裁剪，約快 4 倍。</p>
+
+<h3>④ 更新：每日增量 + 每週對帳</h3>
+<ul>
+<li><b>每日</b>（<code>daily_update.py</code>，一〜六 18:30，9–22 次呼叫、秒級）：先 ingest 三個維度快照，再對兩個價格集抓「新日期 ∪ 最近 3 天重抓（FinMind 結算後會改成交量）∪ 範圍內缺漏」的聯集，逐日 market 呼叫 + 逐日重寫 processed；超過 30 天斷路，叫你去跑 backfill。最後重建維度與 view。</li>
+<li><b>每週</b>（<code>weekly_refresh.py</code>，週日 02:00，約 3,217 次呼叫、43–47 分）：還原價<b>全量重抓</b>約 3,150 檔（每次除權息都改寫整條歷史，不能 append），staged 重建；再跑對帳 A/B/C/D（缺日、稀薄日、零列 ticker、停更 ticker）修未還原價。</li>
+<li><b>年度稽核</b>（<code>discover_delisted.py</code>，不排程）：272 次呼叫重掃已下市 universe。</li>
+</ul>
+
+<!-- ═══════════════ TEJ ═══════════════ -->
+<h2 id="tej">TEJ 管線 <span class="tag tej">Excel COM → xlsx → Parquet → View</span></h2>
+
+<h3>① 取得：沒有 API，是驅動 Excel</h3>
+<p>來源是 TEJ Smart Wizard 增益集（<code>C:/TejPro/.../excel03menu.xla</code>）。
+每本 xlsx 的 A1 儲存格註解存著 TEJ 查詢字串：價格查 <code>waprcd1</code>（調整後日行情，33 個欄位）、
+指數查 <code>widxs</code>（指數成分，7 個欄位）。查詢定義<b>不含證券代碼</b>——代碼在每列 A 欄，
+所以改寫 A 欄再 refresh 就能得到新證券的完整歷史，<code>create_workbooks.py</code> 就是這樣從樣板長出 2,000+ 本新 workbook 的。</p>
+<div class="tblwrap"><table>
+<tr><th></th><th><code>adj_daily_prices</code></th><th><code>index_constituents</code></th></tr>
+<tr><td>TEJ 表</td><td><code>waprcd1</code> 調整後日行情</td><td><code>widxs</code> 指數成分股</td></tr>
+<tr><td>一個檔</td><td>一檔證券全歷史：<code>raw/adj-daily-prices-ticker/&lt;stock_id&gt;.xlsx</code>（2,453 本）</td><td>一個指數一個年度：<code>raw/daily-index-constituents/&lt;INDEX&gt;/&lt;YYYY&gt;.xlsx</code>（TWN50 25 本 + TM100 23 本）</td></tr>
+<tr><td>鍵</td><td><code>(stock_id, date)</code></td><td><code>(index_id, date, stock_id)</code></td></tr>
+<tr><td>xlsx 欄位</td><td>35 欄（A..AI），表頭契約完全一致</td><td>10 欄（A..J）</td></tr>
+</table></div>
+<p class="small">另有兩個不歸本管線更新的外部輸入：<code>company-info.xlsx</code>（TEJ 公司主檔 3,555 家，決定公司池）與
+<code>0050_daily_constituents.feather</code>（現在只剩 ISIN 與 0050 ETF 自身 review 權重的用途，不出 view）。</p>
+
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 980 310" role="img" aria-label="TEJ 更新機制：讀 finmind 交易日曆找缺漏日、插入 seed 列、隱藏 Excel 執行 RefreshFile_Wait、驗證收盤價非空才存檔，失敗則整次中止">
+  <defs><marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <rect x="15" y="30" width="180" height="56" rx="8" fill="var(--fm-soft)" stroke="var(--fm)" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <g stroke="var(--tej)" fill="var(--tej-soft)" stroke-width="1.5">
+    <rect x="245" y="30" width="200" height="56" rx="8"/>
+    <rect x="495" y="30" width="200" height="56" rx="8"/>
+    <rect x="745" y="30" width="220" height="56" rx="8"/>
+    <rect x="745" y="150" width="220" height="52" rx="8"/>
+    <rect x="495" y="150" width="200" height="52" rx="8"/>
+    <rect x="245" y="150" width="200" height="52" rx="8"/>
+    <rect x="15" y="150" width="180" height="52" rx="8"/>
+  </g>
+  <rect x="745" y="248" width="220" height="52" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <g font-size="12" fill="var(--ink)" text-anchor="middle">
+    <text x="105" y="53" font-weight="600" fill="var(--fm)">finmind 交易日曆</text>
+    <text x="105" y="72" font-size="10.5" fill="var(--muted)">expanded-tw-trading-dates</text>
+    <text x="345" y="53" font-weight="600">找缺漏交易日</text>
+    <text x="345" y="72" font-size="10.5" fill="var(--muted)">最新資料日 → 今天；只碰活躍 workbook</text>
+    <text x="595" y="53" font-weight="600">插入 seed 列</text>
+    <text x="595" y="72" font-size="10.5" fill="var(--muted)">A欄代碼＋B欄日期，插在表頭下</text>
+    <text x="855" y="53" font-weight="600">隱藏 Excel 執行 refresh</text>
+    <text x="855" y="72" font-size="10.5" fill="var(--muted)">獨立 desktop・RefreshFile_Wait・watchdog 600s</text>
+    <text x="855" y="172" font-weight="600">驗證：新增列 close 非空？</text>
+    <text x="855" y="191" font-size="10.5" fill="var(--muted)">指數檔驗 成份股 欄非空</text>
+    <text x="595" y="172" font-weight="600">存檔</text>
+    <text x="595" y="191" font-size="10.5" fill="var(--muted)">更新前已備份 temp/workbook-backup/</text>
+    <text x="345" y="172" font-weight="600">rebuild.py 全量重建</text>
+    <text x="345" y="191" font-size="10.5" fill="var(--muted)">xlsx → Parquet，staged swap</text>
+    <text x="105" y="172" font-weight="600">build views</text>
+    <text x="105" y="191" font-size="10.5" fill="var(--muted)">20 views + verify.py 35 項</text>
+    <text x="855" y="270" font-weight="600" fill="var(--warn)">不存檔・整次 update 中止</text>
+    <text x="855" y="289" font-size="10.5" fill="var(--warn)">寧可停下，不寫半筆資料</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#arr3)">
+    <line x1="195" y1="58" x2="242" y2="58"/><line x1="445" y1="58" x2="492" y2="58"/>
+    <line x1="695" y1="58" x2="742" y2="58"/>
+    <line x1="855" y1="86" x2="855" y2="147"/>
+    <line x1="745" y1="176" x2="698" y2="176"/><line x1="495" y1="176" x2="298" y2="176" stroke-dasharray="0"/>
+    <line x1="245" y1="176" x2="198" y2="176"/>
+    <line x1="855" y1="202" x2="855" y2="245" stroke="var(--warn)" style="color:var(--warn)"/>
+  </g>
+  <g font-size="11" text-anchor="middle">
+    <text x="722" y="170" fill="var(--ok)" font-weight="600">是</text>
+    <text x="872" y="228" fill="var(--warn)" font-weight="600">否（TEJ 沒填出新增日）</text>
+  </g>
+</svg>
+</div>
+<figcaption>每日 refresh 機制（<code>ingestion/excel_refresh.py</code>，880 行）。Excel 用 <code>DispatchEx</code> 開新行程、切到獨立 Windows desktop（不會有視窗跳出來搶焦點）、關事件避免彈窗，逾時由 watchdog 砍掉。整批 workbook 都回空 → 視為 TEJ 服務中斷，run 失敗。TEJ session 過期會跳登入視窗卡住隱藏 Excel，所以<b>首次或狀態不明時用 <code>--visible</code> 看著跑</b>。</figcaption>
+</figure>
+
+<h3>② 處理：xlsx → Parquet</h3>
+<ul>
+<li><b>解析</b>（<code>processing/xlsx_reader.py</code>）— 不開 Excel 也不用 openpyxl：把 xlsx 當 zip，用 <code>iterparse</code> 串流讀 <code>sheet1.xml</code>，靠儲存格 <code>r</code> 參照定位（空格不出現在 XML）。表頭必須逐字符合契約否則 <code>WorkbookFormatError</code>。</li>
+<li><b>定型</b>（<code>schema.py</code>／<code>index_schema.py</code>）— Excel 序號日期（epoch 1899-12-30）轉 DATE；<code>"2330 台積電"</code> 從第一個空格切成 <code>stock_id</code>/<code>stock_name</code>；中文欄名轉英文（<code>收盤價→close</code>、<code>次日參考價→next_ref_price</code>…）；加 <code>market</code>、<code>source_file</code>、<code>ingested_at</code>。價格 35→37 欄，view 加分區鍵成 40 欄。</li>
+<li><b>不去重，改斷言唯一</b> — <code>(stock_id, date)</code>／<code>(index_id, date, stock_id)</code> 必須唯一、同指數兩個年度檔不得重疊日期，違反就 fail。</li>
+<li><b>永遠全量重建、不 append</b> — 排序後依 <code>year=/month=/YYYY-MM.parquet</code>（月分區）寫出，整個資料集蓋在 <code>__staging</code> 再原子 swap。單本解析失敗會跳過續跑；解析出 0 列則拒絕換入空資料集。</li>
+<li><b>對帳層</b> — <code>workbook_scan.py</code> 只讀 zip 中繼資料產出 workbook inventory Parquet，供 <code>v_workbook_status</code> 在重建後<b>再次</b>比對列數（<code>rows_delta</code>）、落後天數與查詢契約。</li>
+</ul>
+
+<h3>③ 產出：20 個 view + 3 個 macro</h3>
+<div class="tblwrap"><table>
+<tr><th>分組</th><th>View</th><th>重點</th></tr>
+<tr><td>價格</td><td><code>v_adj_daily_prices</code>・<code>v_securities</code></td><td>主表 40 欄；一檔一列的起訖日、交易日數、<code>is_current</code>。</td></tr>
+<tr><td>價格涵蓋</td><td><code>v_trading_calendar</code>・<code>v_last_trading_day</code>・<code>v_daily_coverage</code>・<code>v_thin_trading_days</code>・<code>v_security_gaps</code></td><td>個股存續期內缺日全是停牌。</td></tr>
+<tr><td>價格對帳</td><td><code>v_workbooks</code>・<code>v_workbook_status</code></td><td><code>days_behind</code>、<code>rows_delta</code>——非成分股最多落後一週，查這裡。</td></tr>
+<tr><td>指數成分</td><td><code>v_index_constituents</code>・<code>v_index_membership</code>・<code>v_index_universe</code></td><td>point-in-time 權威來源；<code>v_index_universe</code> 標示本庫是否有還原價。</td></tr>
+<tr><td>指數涵蓋/對帳</td><td><code>v_index_calendar</code>・<code>v_index_last_trading_day</code>・<code>v_index_daily_coverage</code>・<code>v_thin_index_days</code>・<code>v_index_price_gaps</code>・<code>v_index_workbooks</code>・<code>v_index_workbook_status</code></td><td>成分數 TWN50 46–51、TM100 98–102；權重合計 100±0.5。</td></tr>
+<tr><td>維運</td><td><code>v_ingestion_runs</code></td><td>讀 <code>logs/runs/*.jsonl</code>。</td></tr>
+</table></div>
+<p>Macro：<code>adj_daily_prices_between(lo,hi)</code>、<code>index_constituents_between(lo,hi)</code>、
+<code>index_members_on(index_id, as_of)</code>——回測歷史指數<b>必須</b>用最後這個取當日成分，不能把聯集放進每一天。</p>
+
+<h2 id="schedule">更新排程：誰在什麼時候跑</h2>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 980 230" role="img" aria-label="排程時間軸：平日傍晚 18:30 FinMind 每日、18:45 TEJ 每日（未註冊）；週日凌晨 02:00 FinMind 每週、03:00 TEJ 每週約 8 小時">
+  <defs><marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+  <text x="15" y="24" font-size="13" font-weight="700" fill="var(--ink)">每日（一〜六）傍晚</text>
+  <line x1="60" y1="72" x2="930" y2="72" stroke="var(--line)" stroke-width="2"/>
+  <g font-size="10.5" fill="var(--muted)" text-anchor="middle">
+    <text x="60" y="92">18:00</text><text x="277" y="92">18:30</text><text x="386" y="92">18:45</text>
+    <text x="495" y="92">19:00</text><text x="712" y="92">19:30</text><text x="930" y="92">20:00</text>
+  </g>
+  <g stroke="var(--line)"><line x1="60" y1="66" x2="60" y2="78"/><line x1="277" y1="66" x2="277" y2="78"/>
+    <line x1="386" y1="66" x2="386" y2="78"/><line x1="495" y1="66" x2="495" y2="78"/>
+    <line x1="712" y1="66" x2="712" y2="78"/><line x1="930" y1="66" x2="930" y2="78"/></g>
+  <rect x="277" y="60" width="14" height="12" rx="3" fill="var(--fm)"/>
+  <text x="277" y="50" font-size="11.5" fill="var(--fm)" font-weight="600" text-anchor="middle">FinMind daily_update（秒級）</text>
+  <rect x="386" y="60" width="399" height="12" rx="3" fill="var(--tej)" opacity=".75"/>
+  <text x="586" y="50" font-size="11.5" fill="var(--tej)" font-weight="600" text-anchor="middle">TEJ update.py 約 55 分（⚠ 排程未註冊，目前手動）</text>
+
+  <text x="15" y="140" font-size="13" font-weight="700" fill="var(--ink)">週日凌晨〜上午</text>
+  <line x1="60" y1="188" x2="930" y2="188" stroke="var(--line)" stroke-width="2"/>
+  <g font-size="10.5" fill="var(--muted)" text-anchor="middle">
+    <text x="60" y="208">01:30</text><text x="103" y="208">02:00</text><text x="190" y="208">03:00</text>
+    <text x="450" y="208">06:00</text><text x="711" y="208">09:00</text><text x="930" y="208">11:30</text>
+  </g>
+  <g stroke="var(--line)"><line x1="60" y1="182" x2="60" y2="194"/><line x1="103" y1="182" x2="103" y2="194"/>
+    <line x1="190" y1="182" x2="190" y2="194"/><line x1="450" y1="182" x2="450" y2="194"/>
+    <line x1="711" y1="182" x2="711" y2="194"/><line x1="930" y1="182" x2="930" y2="194"/></g>
+  <rect x="103" y="176" width="66" height="12" rx="3" fill="var(--fm)"/>
+  <text x="136" y="166" font-size="11.5" fill="var(--fm)" font-weight="600" text-anchor="middle">FinMind weekly 43–47 分</text>
+  <rect x="190" y="176" width="688" height="12" rx="3" fill="var(--tej)" opacity=".75"/>
+  <text x="534" y="166" font-size="11.5" fill="var(--tej)" font-weight="600" text-anchor="middle">TEJ weekly_refresh 全量 2,453 本，約 8 小時（擴充後）</text>
+</svg>
+</div>
+<figcaption>TEJ 刻意排在 FinMind 之後 15 分／1 小時：它要讀 finmind 的交易日曆，而 finmind 更新會用 staged swap 重寫它——錯開避免邊寫邊讀，也避免兩個長工作搶同一顆硬碟。</figcaption>
+</figure>
+
+<div class="tblwrap"><table>
+<tr><th>工作</th><th>觸發</th><th>做什麼</th><th>成本</th><th>狀態</th></tr>
+<tr><td>FinMind daily update</td><td>一〜六 18:30</td><td>3 維度快照 + 缺漏日 market 呼叫 + 重建 view</td><td>9–22 次呼叫，秒級</td><td>已註冊（<b>但 09-19 起因 token 降級全數失敗</b>）</td></tr>
+<tr><td>FinMind weekly refresh</td><td>週日 02:00</td><td>還原價全量重抓 + 對帳 A/B/C/D</td><td>~3,217 次呼叫，43–47 分</td><td>同上</td></tr>
+<tr><td>TEJ daily update</td><td>每日 18:45</td><td>指數檔補日 → rebuild index → 當期成分 ~150 本補日 → rebuild → verify</td><td>~55 分</td><td><b>文件有寫但從未註冊</b>，目前手動跑</td></tr>
+<tr><td>TEJ weekly refresh</td><td>週日 03:00</td><td>指數 + 全部 2,453 本全量重抓（還原價非 append-only，退榜證券只有全量才會更新）</td><td>~8 小時（擴充後）</td><td>已註冊（2026-09-05）</td></tr>
+<tr><td>discover_delisted（FinMind）</td><td>不排程，一年一次稽核</td><td>重掃已下市 universe</td><td>272 次呼叫，~4 分</td><td>手動</td></tr>
+</table></div>
+<div class="callout">
+<p class="t">排程註冊的兩個坑</p>
+<p>① 一律用 PowerShell <code>Register-ScheduledTask</code>，<b>不要用 <code>schtasks /TR</code></b>——路徑空格會被切開（FinMind 曾因此靜默失敗一週）。
+② TEJ 必須設「<b>只在使用者登入時執行</b>」：Excel 無法在 Session 0 啟動。FinMind 沒有此限制。
+③ 跨年第一個交易日 TEJ 會大聲失敗——<code>2027.xlsx</code> 指數年度檔要手動在增益集建一次（見 <code>tej-wizard/docs/operations.md</code>）。
+④ 漏跑不用手動補：下次執行會插入所有缺漏交易日。</p>
+</div>
+
+<h2 id="build">從零建置</h2>
+<h3>FinMind（全部可從 API 重抓，約 8,080 次呼叫）</h3>
+<pre><code># 環境：專案 venv（不要用系統 python 或 conda）
+cd pipelines\finmind
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+copy .env.example .env                                # 填 FINMIND_TOKEN、FINMIND_API_HOUR_LIMIT
+
+.\.venv\Scripts\python.exe scripts\backfill.py --tickers 0050,2330   # 試水溫，順便建起日曆
+.\.venv\Scripts\python.exe scripts\discover_delisted.py              # 找回已下市（272 次呼叫）
+.\.venv\Scripts\python.exe scripts\backfill.py                       # 全量 ~7,830 次 / 85–95 分（--resume 可續跑）
+.\.venv\Scripts\python.exe scripts\build_db.py                       # backfill 不會自己建 view
+.\.venv\Scripts\python.exe scripts\verify.py                         # 唯讀健康檢查</code></pre>
+<p class="small">順序不能換：<code>discover_delisted.py</code> 需要日曆已存在；<code>backfill.py</code> 不帶參數 = 在市 + 已下市、兩個價格集。中斷後用 <code>--resume</code>（checkpoint 每 50 檔存一次）。</p>
+
+<h3>TEJ（raw 不可重製——但可從樣板長出新 workbook）</h3>
+<pre><code># 環境：anaconda py312（需 pywin32）
+cd pipelines\tej-wizard
+$python = "python"
+& $python -m pip install -e ".[dev]"
+
+& $python scripts\list_company_tickers.py             # 讀 company-info.xlsx → 公司池清單
+& $python scripts\create_workbooks.py --tickers-file "..\..\db\tej-wizard\state\company_universe_tickers.txt" --dry-run
+& $python scripts\create_workbooks.py --tickers-file "<同上>" --yes   # 複製樣板+改A欄+refresh；~6.5h/2,090 本
+& $python scripts\create_workbooks.py --yes           # 補指數成分中缺 workbook 的
+& $python scripts\rebuild.py                          # 兩個 dataset → Parquet → view（~16 分，不碰 TEJ）
+& $python scripts\verify.py                           # 35 項唯讀檢查</code></pre>
+<p class="small">指數年度檔（48 本）與最初 120 本 workbook 是手動從增益集下載的，沒有程式化 bootstrap。
+新 workbook 在 <code>&lt;id&gt;.building.xlsx</code> 建好、驗證通過才搬進 <code>raw/</code>。
+壞掉時：從 <code>temp\workbook-backup\&lt;時間戳&gt;\</code> 複製回 <code>raw\</code>，再 <code>rebuild.py</code>。</p>
+
+<h3>只重建、不碰來源（兩邊通用的救援路徑）</h3>
+<pre><code># FinMind：raw → processed → view
+.\.venv\Scripts\python.exe -c "from finmind_pipeline.processing import prices, dimensions; prices.rebuild_from_raw('daily_prices'); prices.rebuild_from_raw('adj_daily_prices'); dimensions.process_all_dimensions()"
+.\.venv\Scripts\python.exe scripts\build_db.py
+
+# TEJ：xlsx → Parquet → view
+& $python scripts\rebuild.py            # --only prices|index、--skip-db 可選
+& $python scripts\build_db.py           # 只重建 view</code></pre>
+
+<h2 id="query">查詢方式與陷阱</h2>
+<pre><code>import duckdb
+con = duckdb.connect(r"&lt;repo&gt;\db\finmind\finmind.duckdb",
+                     read_only=True)          # 一律 read_only，寫入連線會鎖住排程更新
+
+con.execute("""
+    SELECT date, stock_id, close, volume
+    FROM daily_prices_between('2024-01-01', '2024-03-31')   -- 用 macro 才會裁剪分區
+    WHERE stock_id = '2330'
+    ORDER BY date
+""").df()</code></pre>
+<ul>
+<li><b><code>stock_id</code> 是字串</b>：<code>'0050'</code> 不是 <code>50</code>。</li>
+<li><b>日期範圍用 macro</b>：Parquet 依 <code>year/month</code> 分區，單寫 <code>WHERE date BETWEEN</code> 不會裁剪分區（finmind 實測一季 0.56s → 0.13s；tej 48ms → 28ms）。</li>
+<li><b>FinMind 還原價 survivors-only</b>：用 <code>v_adj_daily_prices</code> 的結論必須標註；無偏誤橫斷面用 <code>v_daily_prices</code> + <code>v_securities_all</code>（起點 2004-02-11），或改用 TEJ。</li>
+<li><b>TEJ 只有 OHLC 是還原價</b>：同列 <code>bid</code>/<code>offer</code>/<code>next_ref_price</code>/<code>next_limit_*</code> 是未還原原始報價（2330 在 2000-09-04：close 27.99 vs next_ref_price 133.5，差 4.8 倍），混用必錯。</li>
+<li><b>單位是 TEJ 的</b>：成交量千股、成交值千元、市值百萬元；FinMind 的 volume 是股（不是張）。</li>
+<li><b>回測歷史指數用 <code>index_members_on('TWN50', 日期)</code></b> 取當日成分。</li>
+<li><b>最新一天可能不完整</b>：用 <code>v_last_trading_day</code> 取日期，先用 <code>v_daily_coverage</code> 確認該日列數沒有異常偏低。</li>
+</ul>
+
+<h2 id="docs">文件地圖（repo 內已有的深入文件）</h2>
+<div class="tblwrap"><table>
+<tr><th>路徑（pipelines/ 下）</th><th>內容</th></tr>
+<tr><td><code>README.md</code></td><td>總覽（本頁的基底；數字快照為 09-03，已過時）</td></tr>
+<tr><td><code>finmind/docs/architecture.md</code>・<code>tej-wizard/docs/architecture.md</code></td><td>分層契約、設計取捨、內附 mermaid 資料流圖</td></tr>
+<tr><td><code>finmind/docs/data-lineage.md</code></td><td>資料血緣、去重鍵、重建矩陣</td></tr>
+<tr><td><code>finmind/docs/schema.md</code>・<code>tej-wizard/docs/schema.md</code></td><td>欄位對照、上游 API／xlsx 實測行為與缺陷</td></tr>
+<tr><td><code>finmind/docs/operations.md</code>・<code>tej-wizard/docs/operations.md</code></td><td>排程註冊指令、runbook、成本模型、壞掉時怎麼救</td></tr>
+<tr><td><code>finmind/docs/views-guide.md</code></td><td>19 個 view 的完整中文說明</td></tr>
+<tr><td><code>finmind/notebooks/database_usage_guide.ipynb</code>・<code>tej-wizard/notebooks/db_usage_guide.ipynb</code></td><td>給只會 Pandas 的人的完整教學</td></tr>
+</table></div>
+
+<footer>
+整理自 financial-db 的程式碼、文件與資料庫實測（DuckDB read-only 查詢），2026-09-29。
+數字會隨每日更新變動，需要精確值請直接查 <code>v_daily_coverage</code>／<code>v_ingestion_runs</code>。
+</footer>
+</div>
+
+</body></html>

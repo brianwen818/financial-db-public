@@ -13,10 +13,10 @@ Task Sched   每日自動執行
 
 ## 視覺化總覽
 
-| 頁面 | 內容 |
-|---|---|
-| [financial-db 資料地圖](../docs/data-map.md) | 整體資料流程圖、兩庫對照、處理步驟、更新排程時間軸、從零建置指令、查詢陷阱 |
-| [financial-db Schema 圖](../docs/schema-map.md) | raw／processed／view 三層血緣圖，每張表的完整欄位與型別（含 TEJ xlsx 35 欄中文→英文對照） |
+| 頁面 | 內容 | 本地 Markdown 版 |
+|---|---|---|
+| [financial-db 資料地圖](https://brianwen818.github.io/financial-db-public/docs/data-map.html) | 整體資料流程圖、兩庫對照、處理步驟、更新排程時間軸、從零建置指令、查詢陷阱 | [`data-map.md`](../docs/data-map.md) |
+| [financial-db Schema 圖](https://brianwen818.github.io/financial-db-public/docs/schema-map.html) | raw／processed／view 三層血緣圖，每張表的完整欄位與型別（含 TEJ xlsx 35 欄中文→英文對照），滑鼠移到表上會亮起上下游 | [`schema-map.md`](../docs/schema-map.md) |
 
 > 兩份地圖的數字為 **2026-09-29** 實測（比本 README 的 09-03 快照新）。
 
