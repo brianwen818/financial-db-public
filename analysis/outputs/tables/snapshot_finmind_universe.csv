@@ -1,0 +1,7 @@
+﻿type,is_delisted,is_index,securities
+emerging,False,False,387
+tpex,False,False,1137
+tpex,False,True,1
+twse,False,False,1593
+twse,False,True,31
+"(delisted, recovered)",True,False,767

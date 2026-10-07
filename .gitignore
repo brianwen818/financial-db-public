@@ -1,0 +1,26 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# data lives in db/ and is never committed
+db/
+*.parquet
+*.feather
+*.duckdb
+*.duckdb.wal
+*.xlsx
+*.log
+
+# office temp files
+~$*

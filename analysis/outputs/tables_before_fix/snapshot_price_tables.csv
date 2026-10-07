@@ -1,0 +1,5 @@
+﻿view_name,n_rows,securities,first_date,last_date,trading_days
+finmind.v_daily_prices,11751428,3614,1994-10-01,2026-09-16,8069
+finmind.v_adj_daily_prices,11252462,3154,1994-10-01,2026-09-16,8069
+tej.v_adj_daily_prices,10093712,2453,2000-09-04,2026-09-24,6425
+tej.v_index_constituents,834748,367,2002-07-05,2026-09-29,5969

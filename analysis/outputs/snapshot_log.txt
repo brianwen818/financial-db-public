@@ -1,0 +1,105 @@
+﻿
+### snapshot_price_tables  (4 rows)
+                 view_name   n_rows  securities first_date  last_date  trading_days
+    finmind.v_daily_prices 11751428        3614 1994-10-01 2026-09-16          8069
+finmind.v_adj_daily_prices 11252462        3154 1994-10-01 2026-09-16          8069
+    tej.v_adj_daily_prices 10101676        2453 2000-09-04 2026-10-02          6429
+  tej.v_index_constituents   835348         367 2002-07-05 2026-10-05          5973
+
+### snapshot_index_constituents  (2 rows)
+index_id  n_rows  securities first_date  last_date  sessions
+   TM100  537183         340 2004-11-30 2026-10-05      5372
+   TWN50  298165         122 2002-07-05 2026-10-05      5973
+
+### snapshot_finmind_universe  (6 rows)
+                 type  is_delisted  is_index  securities
+             emerging        False     False         387
+                 tpex        False     False        1137
+                 tpex        False      True           1
+                 twse        False     False        1593
+                 twse        False      True          31
+(delisted, recovered)         True     False         767
+
+### snapshot_finmind_delisted_coverage  (1 rows)
+ delisted_recovered  with_unadjusted  with_adjusted
+                767              466              7
+
+### snapshot_tej_universe  (2 rows)
+ is_current  securities first_date  last_date
+      False         462 2000-09-04 2026-09-24
+       True        1991 2000-09-04 2026-10-02
+
+### snapshot_tej_market_rows  (5 rows)
+market  n_rows  securities
+   TSE 5320354        1333
+   OTC 4063400        1411
+   REG  702276        1305
+   TIB   14481          37
+   PSB    1165          17
+
+### snapshot_rows_per_year  (33 rows)
+ year  finmind_unadjusted  finmind_adjusted  tej_adjusted
+ 1994               14319             14308          <NA>
+ 1995               60576             60552          <NA>
+ 1996               71448             71404          <NA>
+ 1997               81099             81074          <NA>
+ 1998               86256             86215          <NA>
+ 1999               98821             98769          <NA>
+ 2000              116658            116555         72840
+ 2001              130384            130290        214366
+ 2002              164375            164236        262941
+ 2003              210548            201869        301378
+ 2004              270309            251861        324866
+ 2005              296647            274554        329829
+ 2006              305901            287985        330793
+ 2007              331686            296831        335072
+ 2008              382166            343713        343672
+ 2009              384308            351645        348654
+ 2010              404746            369877        364712
+ 2011              424820            384977        377642
+ 2012              444564            405229        395370
+ 2013              449151            413103        398335
+ 2014              463993            430463        410922
+ 2015              471835            438850        417344
+ 2016              484530            455362        425400
+ 2017              504737            480957        435679
+ 2018              524226            505266        442767
+ 2019              536423            522786        437307
+ 2020              563905            554451        447070
+ 2021              569140            561939        451366
+ 2022              588424            583849        461152
+ 2023              583915            582674        455505
+ 2024              616392            616320        472146
+ 2025              643323            643323        483527
+ 2026              471803            471175        361021
+
+### snapshot_ingestion_runs  (24 rows)
+pipeline               job                status  runs                  first_run                   last_run
+ finmind          backfill                failed     1 2026-08-26 05:30:43.680521 2026-08-26 05:30:43.680521
+ finmind          backfill               success     4 2026-08-26 05:30:37.217604 2026-08-30 14:25:15.669660
+ finmind      daily_update                failed    14 2026-09-19 01:14:55.319870 2026-10-03 10:30:05.770968
+ finmind      daily_update               success    14 2026-08-26 06:52:44.647620 2026-09-16 10:30:01.870454
+ finmind discover_delisted               success     1 2026-08-30 12:32:20.376862 2026-08-30 12:32:20.376862
+ finmind      full_rebuild               success     1 2026-08-26 06:42:02.147790 2026-08-26 06:42:02.147790
+ finmind ingest_dimensions               success     1 2026-08-26 05:23:57.509389 2026-08-26 05:23:57.509389
+ finmind        smoke_test               success     1 2026-08-26 05:19:34.475056 2026-08-26 05:19:34.475056
+ finmind    weekly_refresh                failed     3 2026-09-20 01:26:24.358997 2026-10-03 18:00:05.233967
+ finmind    weekly_refresh               success     5 2026-08-30 13:44:34.201596 2026-09-12 23:42:45.138239
+     tej            bisect               success     1 2026-09-05 04:53:44.586127 2026-09-05 04:53:44.586127
+     tej  create_workbooks completed_with_errors     2 2026-09-05 04:52:54.745495 2026-09-05 04:54:09.159733
+     tej  create_workbooks                failed     1 2026-09-28 09:10:57.778512 2026-09-28 09:10:57.778512
+     tej  create_workbooks               success     7 2026-09-05 04:56:13.069022 2026-09-28 16:10:22.321654
+     tej           rebuild completed_with_errors     1 2026-09-03 11:15:58.405323 2026-09-03 11:15:58.405323
+     tej           rebuild                failed     1 2026-09-03 05:56:46.484024 2026-09-03 05:56:46.484024
+     tej           rebuild               success    15 2026-09-03 06:02:56.033813 2026-10-04 11:15:26.893130
+     tej refresh_workbooks completed_with_errors     5 2026-09-03 11:53:31.604426 2026-10-03 19:01:01.460146
+     tej refresh_workbooks                failed     1 2026-09-03 11:09:08.729459 2026-09-03 11:09:08.729459
+     tej refresh_workbooks               success    14 2026-09-03 11:10:00.965525 2026-10-03 19:00:02.999676
+     tej            update completed_with_errors     3 2026-09-03 11:09:08.410341 2026-09-05 05:58:16.778244
+     tej            update               success     2 2026-09-03 11:18:21.303958 2026-09-03 12:40:53.903509
+     tej    weekly_refresh completed_with_errors     3 2026-09-19 19:06:18.111793 2026-10-03 19:00:02.118203
+     tej    weekly_refresh               success     2 2026-09-05 19:00:02.728470 2026-09-12 23:42:22.777807
+
+### snapshot_health  (1 rows)
+ fm_missing_days  fm_thin_days  fm_known_empty_days  fm_calendar_days  tej_thin_days  tej_gap_rows  tej_gap_securities  tej_index_price_gaps  tej_members_without_prices  tej_workbook_rows_delta  tej_contract_mismatch
+               0             0                    1              8141              0         67707                 118                    39                           0                        0                      0

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tej-pipeline"
+version = "0.1.0"
+description = "TEJ Smart Wizard -> Parquet -> DuckDB data pipeline for Taiwan securities"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.1",
+    "pyarrow>=17",
+    "PyYAML>=6.0",
+    # Windows ships no IANA tz database, so stdlib zoneinfo cannot resolve the
+    # UTC zone on `ingested_at` (TIMESTAMP WITH TIME ZONE). Without these,
+    # pyarrow's .as_py() and a plain DuckDB `SELECT *` both raise.
+    "tzdata>=2024.1",
+    "pytz>=2024.1",
+    # Excel COM automation. The TEJ add-in is the only way to refresh a
+    # workbook, and it lives inside Excel, so driving Excel is unavoidable.
+    "pywin32>=306; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+notebook = ["pandas>=2.2", "matplotlib>=3.9", "ipykernel>=6.29"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tej_pipeline"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]

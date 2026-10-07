@@ -1,0 +1,63 @@
+# Dataset registry — ingestion 與 processing 都從這裡取設定。
+#
+# 與 FinMind 最大的差別:這裡沒有 API。資料是 TEJ Smart Wizard 增益集寫進
+# xlsx 的,更新單位是「一個檔 = 一檔股票的全歷史」,不是「一天」。
+
+datasets:
+  adj_daily_prices:
+    # TEJ 資料表代碼,取自活頁簿 A1 註解的 tSearchString 第三段。
+    tej_table: "waprcd1"
+    frequency: "DAY"
+    raw: "raw/adj-daily-prices-ticker"
+    processed: "processed/adj-daily-prices"
+    # day  = year=YYYY/month=MM/YYYY-MM-DD.parquet(與 finmind 一致)
+    # month= year=YYYY/month=MM/YYYY-MM.parquet(檔案少 20 倍,掃描較快)
+    #
+    # 實測(2026-09-03,651,011 列):
+    #   grain   files   size      full scan   3個月區間   單一 ticker
+    #   day      6409   188.9 MB    624 ms      112 ms      620 ms
+    #   month     313    67.1 MB     41 ms       19 ms       40 ms
+    # month 快 15 倍且小 2.8 倍。一天只有約 100 列,per-day 檔案既壓不動、
+    # 字典編碼也失效,還要各自扛一份 38 欄的 footer。
+    # finmind 用 day 是因為它「每天只新增一個檔」,中斷的 run 不會弄壞舊資料;
+    # 這裡的更新單位是 ticker,每次都是全量重建 + staged swap,拿不到那個好處。
+    # 兩種都支援,改這一行 rebuild 即可換過去。
+    partition: "month"
+    # 活頁簿裡 TEJ 區塊的具名範圍前綴。增益集用它定位可更新的區塊。
+    defined_name_prefix: "XX_TEJ"
+    sheet_name: "工作表1"
+
+  index_constituents:
+    # TEJ 資料表代碼,取自活頁簿 A1 註解的 tSearchString 第三段。
+    tej_table: "widxs"
+    frequency: "DAY"
+    raw: "raw/daily-index-constituents"
+    processed: "processed/index-constituents"
+    # 832,648 列、約 100 列/日,和價格表同一個形狀,所以同樣用 month。
+    partition: "month"
+    defined_name_prefix: "XX_TEJ"
+    sheet_name: "工作表1"
+    # 一個指數一個子目錄,一年一個檔(<YYYY>.xlsx)。TEJ 一次查詢拉不動 20 年
+    # 全歷史,年度切檔是來源端的限制,不是這裡的選擇。
+    layout: "index-year"
+    # 目錄名 -> TEJ 寫進 A 欄的身分字串。seed 新交易日時要原字不差地寫回去,
+    # 否則增益集解析不出要查哪個指數。
+    indices:
+      TWN50: "TWN50 台灣50指數"
+      TM100: "TM100 台灣中型指數"
+
+# TEJ Smart Wizard 增益集。更新機制不是 HTTP API,是 Excel COM 自動化。
+addin:
+  # Excel 啟動時自動載入的 XLA(來源:HKCU\...\Office\16.0\Excel\Options 的 OPEN)
+  xla_path: "C:/TejPro/TEJ Smart Wizard/excel03menu.xla"
+  install_dir: "C:/TejPro/TEJ Smart Wizard"
+  # excel03menu.xla 的 Module1 匯出的巨集名稱,對應增益集選單上的
+  # "Refresh Work Book" / "Refresh Work Sheet"。
+  # RefreshFile only launches TEJRefresh.exe asynchronously.  The _Wait
+  # variant blocks until TEJ has finished populating the workbook.
+  refresh_macro: "RefreshFile_Wait"
+  refresh_sheet_macro: "RefreshWorkSheet"
+  # 單一活頁簿更新的逾時。6,400 列的全歷史重抓實測約數十秒,留寬。
+  timeout_seconds: 600
+  # 每個檔之間的間隔,避免連續打 TEJ 伺服器。
+  pause_seconds: 2.0

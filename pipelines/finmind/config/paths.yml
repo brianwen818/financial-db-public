@@ -1,0 +1,13 @@
+# 資料根目錄。可用環境變數 FINMIND_DB_ROOT 覆寫。
+db_root: "../../db/finmind"
+
+# 以下皆相對於 db_root
+raw: "raw"
+processed: "processed"
+logs: "logs"
+state: "state"
+temp: "temp"
+duckdb_file: "finmind.duckdb"
+
+rate_limit_state: "state/rate_limit.json"
+backfill_checkpoint: "state/backfill_checkpoint.json"

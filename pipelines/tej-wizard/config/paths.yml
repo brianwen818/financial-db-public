@@ -1,0 +1,14 @@
+# 資料根目錄。可用環境變數 TEJ_DB_ROOT 覆寫。
+db_root: "../../db/tej-wizard"
+
+# 以下皆相對於 db_root
+raw: "raw"
+processed: "processed"
+logs: "logs"
+state: "state"
+temp: "temp"
+duckdb_file: "tej_wizard.duckdb"
+
+# FinMind-expanded Taiwan trading calendar used to seed missing dates into the
+# TEJ workbooks before Smart Wizard refreshes them.
+trading_dates_file: "../../db/finmind/processed/expanded-tw-trading-dates/expanded_tw_trading_dates.parquet"

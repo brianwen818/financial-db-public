@@ -1,0 +1,6 @@
+﻿cause,days,securities,median_abs_raw_return_pct,median_abs_tej_return_pct,median_abs_fm_return_pct,tej_beyond_limit,fm_beyond_limit
+A no-trade day (FinMind unadjusted close = 0),7048,395,100.0,2.7,0.0,215,818
+B pipeline: stale market-day snapshot overrode ticker history,105,59,0.65,0.65,4.64,0,15
+C FinMind left a corporate action unadjusted,2806,864,7.05,2.52,7.05,27,1328
+D FinMind adjusted where the unadjusted price shows no event,20,20,3.79,3.79,9.91,2,11
+"E both adjusted, by different amounts",9,9,2.24,1.18,2.55,1,1

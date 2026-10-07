@@ -1,0 +1,90 @@
+# Dataset registry — ingestion 與 processing 都從這裡取設定。
+#
+# fetch_modes:
+#   market  = 不帶 data_id 的全市場單日呼叫（1 call/日）
+#   ticker  = 帶 data_id 的單檔全歷史呼叫（1 call/檔）
+#   single  = 整包一次抓完（無日期參數）
+#
+# 歷史起點：最早的台股日線可回溯到 1994-10-01（2330 實測）
+
+history_start: "1994-10-01"
+
+datasets:
+  daily_prices:
+    finmind_dataset: "TaiwanStockPrice"
+    fetch_modes: ["market", "ticker"]
+    raw_market: "raw/daily-prices-market"
+    raw_ticker: "raw/daily-prices-ticker"
+    processed: "processed/daily-prices"
+    partition: "day"          # year=YYYY/month=MM/YYYY-MM-DD.parquet
+    filter_to_universe: true  # 全市場回應含 4 萬檔權證，只留 stock_info 宇宙
+
+  adj_daily_prices:
+    finmind_dataset: "TaiwanStockPriceAdj"
+    fetch_modes: ["market", "ticker"]
+    raw_market: "raw/adj-daily-prices-market"
+    raw_ticker: "raw/adj-daily-prices-ticker"
+    processed: "processed/adj-daily-prices"
+    partition: "day"
+    filter_to_universe: true  # adj 本來就只回股票，過濾是防禦性的
+    # 還原價每次除權息都會改寫整段歷史，所以全市場日檔只是「抓取當下那個基準」
+    # 的快照。讓它蓋過每週重抓的 ticker 全歷史，就會把舊基準混進新基準裡
+    # （實測 2026-08-21..09-11 有 319 檔、1,046 列因此出現假性斷點）。
+    dedupe_prefer: "ticker"
+
+  tw_stock_info:
+    finmind_dataset: "TaiwanStockInfo"
+    fetch_modes: ["single"]
+    raw: "raw/tw-stock-info"
+    processed: "processed/tw-stock-info"
+    partition: "snapshot"     # raw/<YYYY-MM-DD>.parquet, processed 單檔
+
+  tw_industry:
+    finmind_dataset: "TaiwanStockIndustryChain"
+    fetch_modes: ["single"]
+    raw: "raw/tw-industry"
+    processed: "processed/tw-industry"
+    partition: "snapshot"
+
+  tw_trading_dates:
+    finmind_dataset: "TaiwanStockTradingDate"
+    fetch_modes: ["single"]
+    raw: "raw/tw-trading-dates"
+    processed: "processed/expanded-tw-trading-dates"
+    partition: "snapshot"
+
+  # 已下市證券的名稱與下市日。實測 723 筆，1995-09-23 起。
+  # 涵蓋不完整：僅約 1/3 的缺口代碼在其中，其餘要靠 discovered_universe 找。
+  tw_delisting:
+    finmind_dataset: "TaiwanStockDelisting"
+    fetch_modes: ["single"]
+    raw: "raw/tw-delisting"
+    processed: "processed/tw-delisting"
+    partition: "snapshot"
+
+  # 不是 FinMind 的資料集，是「每月抽一個交易日做全市場呼叫」的觀測結果。
+  # TaiwanStockInfo 只含目前在市的證券，因此第一份 snapshot 之前就下市的代碼
+  # 沒有別的途徑進入 universe——這個 sweep 是唯一來源。
+  discovered_universe:
+    finmind_dataset: "TaiwanStockPrice"
+    fetch_modes: ["market"]
+    raw: "raw/discovered-universe"
+    processed: "processed/delisted-securities"
+    partition: "snapshot"
+    # 全市場資料的起點。早於此日期，逐檔呼叫只對「仍在市」的證券有資料，
+    # 全市場呼叫則完全沒有回應，抽樣過去只是浪費配額。
+    history_start: "2004-02-11"
+
+api:
+  base_url: "https://api.finmindtrade.com/api/v4/data"
+  user_info_url: "https://api.web.finmindtrade.com/v2/user_info"
+  timeout_seconds: 300
+  # 持續速率 = api_hour_limit * 此比例；burst 容量 = 兩者的差額。
+  # 令牌桶在被消耗的同時也在回填，所以任一小時內最多放行
+  #   burst + rate*1h = (6000-5400) + 5400 = 6000
+  # 恰好等於方案上限。把 burst 設成等於 rate 會放行到兩倍，實測會吃 402。
+  rate_budget_ratio: 0.9
+  max_retries: 5
+  # 收到 402 時的退避：不讓單次配額拒絕殺掉整個 backfill
+  quota_backoff_seconds: 300
+  quota_retries: 8

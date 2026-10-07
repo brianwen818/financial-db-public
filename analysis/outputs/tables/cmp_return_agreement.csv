@@ -1,0 +1,5 @@
+﻿segment,both_days_traded,n,agree_within_10bp_pct,disagree_gt_1pct,correlation
+emerging (REG),True,391350,99.5222,1677,0.999817
+emerging (REG),False,128061,99.4768,546,0.228442
+listed (TSE/OTC/TIB),True,8679582,99.9617,2845,0.996321
+listed (TSE/OTC/TIB),False,165880,90.7662,7163,0.283403
